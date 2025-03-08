@@ -47,5 +47,7 @@ USER appuser
 # Expose the application port
 EXPOSE 8000 
  
-# Start the application using Gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "agendadosDjango.wsgi:application"]
+# Start the application using Gunicorn (by the moment run it in development mode)
+#CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "--reload", "agendadosDjango.wsgi:application"]
+
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]

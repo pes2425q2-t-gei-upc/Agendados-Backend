@@ -1,35 +1,42 @@
 from rest_framework import serializers
 from .models import Event, Category, Scope, Location, EventImage, EventLink, UserEvent
 
+
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = ['name']
+        fields = ["name"]
+
 
 class ScopeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Scope
-        fields = ['name']
+        fields = ["name"]
+
 
 class LocationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Location
-        fields = ['latitude', 'longitude', 'region', 'town', 'address', 'space']
+        fields = ["latitude", "longitude", "region", "town", "address", "space"]
+
 
 class EventImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = EventImage
-        fields = ['image']
+        fields = ["image"]
+
 
 class EventLinkSerializer(serializers.ModelSerializer):
     class Meta:
         model = EventLink
-        fields = ['link']
+        fields = ["link"]
+
 
 class UserEventSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserEvent
-        fields = ['user', 'event', 'date_joined']
+        fields = ["user", "event", "date_joined"]
+
 
 class EventSerializer(serializers.ModelSerializer):
     categories = CategorySerializer(many=True)
@@ -42,17 +49,17 @@ class EventSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
         fields = [
-            'code',
-            'title',
-            'description',
-            'dateIni',
-            'dateEnd',
-            'infoTickets',
-            'schedule',
-            'categories',
-            'scopes',
-            'location',
-            'images',
-            'links',
-            'attendees'
+            "code",
+            "title",
+            "description",
+            "dateIni",
+            "dateEnd",
+            "infoTickets",
+            "schedule",
+            "categories",
+            "scopes",
+            "location",
+            "images",
+            "links",
+            "attendees",
         ]

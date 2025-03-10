@@ -12,7 +12,7 @@ class Event(models.Model):
     schedule = models.TextField(null=True)
     categories = models.ManyToManyField("Category", related_name="events")
     scopes = models.ManyToManyField("Scope", related_name="events")
-    location = models.ForeignKey("Location", on_delete=models.CASCADE)
+    location = models.ForeignKey("locations.Location", on_delete=models.CASCADE)
     attendees = models.ManyToManyField(
         User, through="UserEvent", related_name="attended_events"
     )
@@ -33,15 +33,6 @@ class Category(models.Model):
 
 class Scope(models.Model):
     name = models.CharField(max_length=50)
-
-
-class Location(models.Model):
-    latitude = models.FloatField()
-    longitude = models.FloatField()
-    region = models.CharField(max_length=200)
-    town = models.CharField(max_length=200)
-    address = models.CharField(max_length=200)
-    space = models.CharField(max_length=200)
 
 
 class EventImage(models.Model):

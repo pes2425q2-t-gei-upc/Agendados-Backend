@@ -39,7 +39,6 @@ class EventSerializer(serializers.ModelSerializer):
     location = LocationSerializer()
     images = EventImageSerializer(many=True)
     links = EventLinkSerializer(many=True)
-    attendees = UserEventSerializer(many=True, read_only=True)
 
     class Meta:
         model = Event
@@ -56,5 +55,4 @@ class EventSerializer(serializers.ModelSerializer):
             "location",
             "images",
             "links",
-            "attendees",
         ]

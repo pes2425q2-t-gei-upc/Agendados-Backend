@@ -6,12 +6,24 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_201_CREATED, HTTP_200_OK, HTTP_404_NOT_FOUND
 
 from apps.events.models import Event, UserEvent
+from apps.events.serializers import EventSerializer
 
+
+@api_view(["GET"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def get_user_favorites(request):
+    user = request.user
+    user_events = UserEvent.objects.filter(user=user)
+    events = [user_event.event for user_event in user_events]
+    print(events)
+    serializer = EventSerializer(events, many=True)
+    return Response(serializer.data)
 
 @api_view(["POST", "DELETE"])
 @authentication_classes([TokenAuthentication])
 @permission_classes([IsAuthenticated])
-def favorites(request, event_id):
+def add_or_remove_favorites(request, event_id):
     user = request.user
     event = get_object_or_404(Event, id=event_id)
 

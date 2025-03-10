@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models import Event, Category, Scope, Location, EventImage, EventLink, UserEvent
+from .models import Event, Category, Scope, EventImage, EventLink, UserEvent
+from ..locations.serializers import LocationSerializer
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -12,12 +13,6 @@ class ScopeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Scope
         fields = ["name"]
-
-
-class LocationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Location
-        fields = ["latitude", "longitude", "region", "town", "address", "space"]
 
 
 class EventImageSerializer(serializers.ModelSerializer):
@@ -44,12 +39,11 @@ class EventSerializer(serializers.ModelSerializer):
     location = LocationSerializer()
     images = EventImageSerializer(many=True)
     links = EventLinkSerializer(many=True)
-    attendees = UserEventSerializer(many=True, read_only=True)
 
     class Meta:
         model = Event
         fields = [
-            "code",
+            "id",
             "title",
             "description",
             "dateIni",
@@ -61,5 +55,4 @@ class EventSerializer(serializers.ModelSerializer):
             "location",
             "images",
             "links",
-            "attendees",
         ]

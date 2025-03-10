@@ -4,12 +4,12 @@ from .models import Location, Region, Town
 class RegionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Region
-        fields = ["name"]
+        fields = ["id", "name"]
 
 class TownSerializer(serializers.ModelSerializer):
     class Meta:
         model = Town
-        fields = ["name"]
+        fields = ["id", "name"]
 
 class LocationSerializer(serializers.ModelSerializer):
     region = RegionSerializer()
@@ -17,4 +17,4 @@ class LocationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Location
-        fields = ["region", "town", "latitude", "longitude", "address", "space"]
+        fields = ["id", "region", "town", "latitude", "longitude", "address", "space"]

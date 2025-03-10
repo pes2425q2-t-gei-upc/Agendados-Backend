@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 
 
 class Event(models.Model):
-    code = models.CharField(max_length=30, primary_key=True)
+    id = models.CharField(max_length=30, primary_key=True)
     title = models.CharField(max_length=200)
     description = models.TextField(null=True)
     dateIni = models.DateTimeField()

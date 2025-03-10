@@ -44,7 +44,7 @@ class EventSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
         fields = [
-            "code",
+            "id",
             "title",
             "description",
             "dateIni",

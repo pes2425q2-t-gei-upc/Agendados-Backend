@@ -45,6 +45,8 @@ jobs:
           VALIDATE_MARKDOWN: false
           VALIDATE_MARKDOWN_PRETTIER: false
           VALIDATE_PYTHON_PYLINT: false
+          VALIDATE_PYTHON_PYINK: false
+          VALIDATE_ENV: false
 
       - name: Commit and push linting fixes
         # Run only on:

@@ -1,9 +1,11 @@
 ---
 name: Lint
 
-on: # yamllint disable-line rule:truthy
-  push: null
-  pull_request: null
+on:
+  push:
+   branches: [ "develop" ]
+  pull_request:
+   branches: [ "develop" ]
 
 permissions: {}
 
@@ -58,6 +60,6 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           branch: ${{ github.event.pull_request.head.ref || github.head_ref || github.ref }}
-          commit_message: "chore: fix linting issues"
+          commit_message: " fix linting issues"
           commit_user_name: super-linter
           commit_user_email: super-linter@super-linter.dev

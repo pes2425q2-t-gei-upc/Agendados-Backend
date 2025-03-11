@@ -12,7 +12,7 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1 
  
 # Upgrade pip and install dependencies
-RUN pip install --upgrade pip 
+RUN pip install --upgrade pip setuptools
  
 # Copy the requirements file first (better caching)
 COPY requirements.txt /app/

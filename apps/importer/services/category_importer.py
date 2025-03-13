@@ -10,7 +10,6 @@ def import_category(row):
     return category
 
 def parse_category(category_string):
-    print(category_string)
     category = category_string.split("/")[-1]
     formatted_category = category.replace("-", " ").title()
     return formatted_category

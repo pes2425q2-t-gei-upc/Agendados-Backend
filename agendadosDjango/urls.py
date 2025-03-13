@@ -20,6 +20,8 @@ from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 
+
+
 schema_view = get_schema_view(
     openapi.Info(
         title="API Documentation",
@@ -33,8 +35,8 @@ schema_view = get_schema_view(
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/users/", include("apps.users.urls")),
-    path("api/events", include("apps.events.urls")),
-    path("api/locations", include("apps.locations.urls")),
+    path("api/events/", include("apps.events.urls")),
+    path("api/locations/", include("apps.locations.urls")),
     re_path(
         r"^swagger(?P<format>\.json|\.yaml)$",
         schema_view.without_ui(cache_timeout=0),

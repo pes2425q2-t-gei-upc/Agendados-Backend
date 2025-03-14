@@ -1,7 +1,6 @@
 from apps.locations.models import Region, Location
 from apps.locations.models import Town
 import pandas as pd
-import re
 
 def import_location(row):
     region = import_region(row)

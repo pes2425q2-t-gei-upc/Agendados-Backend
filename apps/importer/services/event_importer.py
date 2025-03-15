@@ -1,3 +1,5 @@
+from django.utils.timezone import make_aware, get_current_timezone
+
 from apps.events.models import Event
 import pandas as pd
 from datetime import datetime
@@ -16,9 +18,12 @@ def import_event(row, category, location):
     schedule = clean_value(row['Horari'])
 
     if location:
-        event, created = Event.objects.get_or_create(id=codi, title=title, date_ini=format_date(date_ini), date_end=format_date(date_end), description=description, info_tickets=info_tickets, schedule=schedule, location=location)
-        if created and category:
-            event.categories.set([category])
+        try :
+            event, created = Event.objects.get_or_create(id=codi, title=title, date_ini=format_date(date_ini), date_end=format_date(date_end), description=description, info_tickets=info_tickets, schedule=schedule, location=location)
+            if created and category:
+                event.categories.set([category])
+        except Exception as e:
+            print('Error importing event %s: %s', codi, e)
 
 def clean_value(value):
     return None if pd.isna(value) else value
@@ -27,6 +32,8 @@ def format_date(date_str):
     if not date_str:
         return None
     try:
-        return datetime.strptime(date_str, "%d/%m/%Y").strftime("%Y-%m-%d")
+        naive_datetime = datetime.strptime(date_str, "%d/%m/%Y")
+        aware_datetime = make_aware(naive_datetime, get_current_timezone())
+        return aware_datetime
     except ValueError:
         return None

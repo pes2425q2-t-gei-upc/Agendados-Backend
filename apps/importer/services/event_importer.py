@@ -4,12 +4,8 @@ from apps.events.models import Event
 import pandas as pd
 from datetime import datetime
 
-def import_event(row, category, location):
-    codi = row['codi']
-    event = Event.objects.filter(id=codi).first()
-    if event:
-        return event
-
+def import_event(row, categories, location):
+    code = row['codi']
     title = row['Denominació']
     date_ini = clean_value(row['Data inici'])
     date_end = clean_value(row['Data fi'])
@@ -17,13 +13,11 @@ def import_event(row, category, location):
     info_tickets = clean_value(row['Entrades'])
     schedule = clean_value(row['Horari'])
 
-    if location:
-        try :
-            event, created = Event.objects.get_or_create(id=codi, title=title, date_ini=format_date(date_ini), date_end=format_date(date_end), description=description, info_tickets=info_tickets, schedule=schedule, location=location)
-            if created and category:
-                event.categories.set([category])
-        except Exception as e:
-            print('Error importing event %s: %s', codi, e)
+    event = Event.objects.create(code=code, title=title, date_ini=format_date(date_ini), date_end=format_date(date_end), description=description, info_tickets=info_tickets, schedule=schedule, location=location)
+    if categories:
+        event.categories.set(categories)
+
+    return event
 
 def clean_value(value):
     return None if pd.isna(value) else value

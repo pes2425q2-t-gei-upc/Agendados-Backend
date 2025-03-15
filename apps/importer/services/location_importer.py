@@ -11,7 +11,7 @@ def import_location(row):
         longitude = clean_value(row['Longitud'])
         address = clean_value(row['Adreça'])
         space = clean_value(row['Espai'])
-        location, created = Location.objects.get_or_create(region=region, town=town, latitude=latitude, longitude=longitude,
+        location = Location.objects.create(region=region, town=town, latitude=latitude, longitude=longitude,
                                                   address=address, space=space)
         return location
     else:

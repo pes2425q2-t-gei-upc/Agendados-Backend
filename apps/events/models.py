@@ -3,8 +3,9 @@ from django.contrib.auth.models import User
 
 
 class Event(models.Model):
-    id = models.CharField(max_length=30, primary_key=True)
-    title = models.CharField(max_length=200)
+    id = models.AutoField(primary_key=True)
+    code = models.CharField(max_length=100, null=True)
+    title = models.CharField(max_length=400)
     description = models.TextField(null=True)
     date_ini = models.DateTimeField(null=True)
     date_end = models.DateTimeField(null=True)
@@ -12,7 +13,7 @@ class Event(models.Model):
     schedule = models.TextField(null=True)
     categories = models.ManyToManyField("Category", related_name="events")
     scopes = models.ManyToManyField("Scope", related_name="events")
-    location = models.ForeignKey("locations.Location", on_delete=models.CASCADE)
+    location = models.ForeignKey("locations.Location", on_delete=models.CASCADE, null=True)
     attendees = models.ManyToManyField(
         User, through="UserEvent", related_name="attended_events"
     )

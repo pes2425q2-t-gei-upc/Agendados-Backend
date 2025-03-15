@@ -2,11 +2,11 @@ from django.db import models
 
 
 class Region(models.Model):
-    name = models.CharField(max_length=200, unique=True)
+    name = models.CharField(max_length=300, unique=True)
 
 
 class Town(models.Model):
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=300)
     region = models.ForeignKey(Region, on_delete=models.CASCADE)
 
     class Meta:
@@ -18,5 +18,5 @@ class Location(models.Model):
     town = models.ForeignKey(Town, on_delete=models.CASCADE)
     latitude = models.FloatField(null=True)
     longitude = models.FloatField(null=True)
-    address = models.CharField(max_length=400, null=True)
-    space = models.CharField(max_length=400, null=True)
+    address = models.CharField(max_length=500, null=True)
+    space = models.CharField(max_length=500, null=True)

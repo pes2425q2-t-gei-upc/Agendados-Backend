@@ -7,17 +7,15 @@ def import_location(row):
     town = import_town(row, region)
 
     if region and town:
-        latitude = row['Latitud']
-        longitude = row['Longitud']
-        address = row['Adreça']
-        space = row['Espai']
+        latitude = clean_value(row['Latitud'])
+        longitude = clean_value(row['Longitud'])
+        address = clean_value(row['Adreça'])
+        space = clean_value(row['Espai'])
         location, created = Location.objects.get_or_create(region=region, town=town, latitude=latitude, longitude=longitude,
                                                   address=address, space=space)
         return location
     else:
         return None
-
-
 
 def import_region(row):
     region_name = row['Comarca']
@@ -46,3 +44,6 @@ def parser(name):
     formatted_name = name.split("/")[-1]
     formatted_name = formatted_name.replace("-", " ").title()
     return formatted_name
+
+def clean_value(value):
+    return None if pd.isna(value) else value

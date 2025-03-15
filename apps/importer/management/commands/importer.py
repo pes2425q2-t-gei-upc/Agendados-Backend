@@ -12,12 +12,12 @@ file_path = os.path.join(BASE_DIR, "..", "..", "data", "events.csv")
 #Logger configuration
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 logger_path = os.path.join(BASE_DIR, "..", "data", "importer.log")
-if os.path.exists(file_path):
-    os.remove(file_path)
+if os.path.exists(logger_path):
+    os.remove(logger_path)
 
 logging.basicConfig(
     filename=file_path,
-    level=logger_path.INFO,
+    level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
 )

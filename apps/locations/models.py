@@ -16,7 +16,7 @@ class Town(models.Model):
 class Location(models.Model):
     region = models.ForeignKey(Region, on_delete=models.CASCADE)
     town = models.ForeignKey(Town, on_delete=models.CASCADE)
-    latitude = models.FloatField()
-    longitude = models.FloatField()
-    address = models.CharField(max_length=400)
-    space = models.CharField(max_length=400)
+    latitude = models.FloatField(null=True)
+    longitude = models.FloatField(null=True)
+    address = models.CharField(max_length=400, null=True)
+    space = models.CharField(max_length=400, null=True)

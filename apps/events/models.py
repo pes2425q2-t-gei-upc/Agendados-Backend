@@ -16,12 +16,23 @@ class Event(models.Model):
     attendees = models.ManyToManyField(
         User, through="UserEvent", related_name="attended_events"
     )
+    discarded_by = models.ManyToManyField(
+        User, through="UserDiscardedEvent", related_name="discarded_events"
+    )
 
 
 class UserEvent(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
     date_joined = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("user", "event")
+
+class UserDiscardedEvent(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    event = models.ForeignKey(Event, on_delete=models.CASCADE)
+    date_discarded = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         unique_together = ("user", "event")

@@ -9,6 +9,10 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.RunSQL(
+            "DROP INDEX IF EXISTS events_event_code_1d888711_like;",
+            reverse_sql="CREATE INDEX events_event_code_1d888711_like ON events_event USING btree (code varchar_pattern_ops);",
+        ),
         migrations.AddField(
             model_name="event",
             name="code",

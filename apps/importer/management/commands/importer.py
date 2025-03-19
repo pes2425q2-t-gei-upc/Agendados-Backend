@@ -28,17 +28,9 @@ class Command(BaseCommand):
         df = pd.read_csv(file_path, low_memory=False)
         for index, row in df.iterrows():
             logging.info('Processing row %s', index)
-            #Categories import
-            categories = import_categories(row)
-            logging.info('Categories imported: %s', categories)
-
-            #Location import
-            location = import_location(row)
-            logging.info('Location imported: %s', location)
-
             #Event import
             try:
-                event = import_event(row, categories, location)
+                event = import_event(row)
                 logging.info('Event imported: %s', event)
             except Exception as e:
                 logging.error('Error importing event: %s', e)

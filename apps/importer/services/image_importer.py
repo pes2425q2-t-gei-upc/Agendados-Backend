@@ -11,7 +11,7 @@ def import_images(row, event):
     result = []
 
     for image_url in images_array:
-        image, created = EventImage.objects.get_or_create(image_url=image_url, event_id=event.id)
+        image, created = EventImage.objects.get_or_create(image_url=parse_image(image_url), event_id=event.id)
         result.append(image)
     return result
 

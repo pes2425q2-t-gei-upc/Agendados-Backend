@@ -6,6 +6,7 @@ from datetime import datetime
 import logging
 
 from apps.importer.services.category_importer import import_categories
+from apps.importer.services.image_importer import import_images
 from apps.importer.services.location_importer import import_location
 
 
@@ -32,6 +33,8 @@ def import_event(row):
         event = Event.objects.create(code=code, title=title, date_ini=formatted_date_ini, date_end=formatted_date_end, description=description, info_tickets=info_tickets, schedule=schedule, location=location)
         if categories:
             event.categories.set(categories)
+        if event:
+            import_images(row, event)
         return event
     return None
 

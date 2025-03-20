@@ -7,6 +7,7 @@ import logging
 
 from apps.importer.services.category_importer import import_categories
 from apps.importer.services.image_importer import import_images
+from apps.importer.services.link_importer import import_links
 from apps.importer.services.location_importer import import_location
 
 
@@ -35,6 +36,7 @@ def import_event(row):
             event.categories.set(categories)
         if event:
             import_images(row, event)
+            import_links(row, event)
         return event
     return None
 

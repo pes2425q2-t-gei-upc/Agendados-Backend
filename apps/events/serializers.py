@@ -18,7 +18,7 @@ class ScopeSerializer(serializers.ModelSerializer):
 class EventImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = EventImage
-        fields = ["image"]
+        fields = ["image_url"]
 
 
 class EventLinkSerializer(serializers.ModelSerializer):

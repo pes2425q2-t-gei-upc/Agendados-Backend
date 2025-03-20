@@ -49,7 +49,7 @@ class Scope(models.Model):
 
 class EventImage(models.Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="images")
-    image = models.ImageField(upload_to="events/images")
+    image_url = models.ImageField(upload_to="events/images")
 
 
 class EventLink(models.Model):

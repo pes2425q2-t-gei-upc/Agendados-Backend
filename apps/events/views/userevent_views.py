@@ -14,8 +14,8 @@ from apps.events.serializers import EventSerializer
 
 
 @api_view(["GET"])
-@authentication_classes([TokenAuthentication])
-@permission_classes([IsAuthenticated])
+#@authentication_classes([TokenAuthentication])
+#@permission_classes([IsAuthenticated])
 def get_user_favorites(request):
     user = request.user
     user_events = UserEvent.objects.filter(user=user)

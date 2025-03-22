@@ -3,6 +3,7 @@ from apps.events.views import event_views, category_views, userevent_views, user
 
 urlpatterns = [
     path("", event_views.get_all_events, name="get_all_events"),
+    path("recommended", event_views.get_recommended_events, name="get_recommended_events"),
     path("categories", category_views.get_all_categories, name="get_all_categories"),
     path("<int:event_id>", event_views.get_event_details, name="get_event_details"),
     path(

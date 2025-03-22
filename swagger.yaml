@@ -15,6 +15,9 @@ components:
       name: Authorization
       description: "Usa el token en el formato: Token <tu_token>"
 
+security:
+  - TokenAuth: []
+
 paths:
   /api/events/:
     get:
@@ -31,6 +34,28 @@ paths:
           description: ''
       tags:
       - events
+  /api/events/recommended:
+    get:
+      operationId: listget_recommended_events
+      description: ''
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          description: "Número máximo de eventos a devolver (por defecto 50)"
+          schema:
+            type: integer
+            example: 50
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { }
+          description: ''
+      tags:
+        - events
   /api/events/categories:
     get:
       operationId: listget_all_categories

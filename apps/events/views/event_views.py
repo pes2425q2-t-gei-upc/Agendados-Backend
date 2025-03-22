@@ -3,7 +3,8 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from apps.events.models import Event
-from apps.events.serializers import EventSerializer
+from apps.events.serializers import EventSerializer, EventSummarizedSerializer
+
 
 @api_view(["GET"])
 def get_event_details(request, event_id):
@@ -13,12 +14,6 @@ def get_event_details(request, event_id):
 
 @api_view(["GET"])
 def get_all_events(request):
-    limit = request.query_params.get("limit", 50)
-    try:
-        limit = int(limit)
-    except ValueError:
-        return Response({"error": "Invalid limit value"}, status=400)
-
-    events = Event.objects.all()[:limit]
-    serializer = EventSerializer(events, many=True)
+    events = Event.objects.all()
+    serializer = EventSummarizedSerializer(events, many=True)
     return Response(serializer.data)

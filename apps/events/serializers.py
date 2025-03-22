@@ -56,3 +56,12 @@ class EventSerializer(serializers.ModelSerializer):
             "images",
             "links",
         ]
+
+class EventSummarizedSerializer(serializers.ModelSerializer):
+    categories = CategorySerializer(many=True)
+    location = LocationSerializer()
+    images = EventImageSerializer(many=True)
+
+    class Meta:
+        model = Event
+        fields = ["id", "title", "date_ini", "date_end", "categories", "location", "images"]

@@ -1,3 +1,4 @@
+from django.conf import settings
 from rest_framework import serializers
 from .models import Event, Category, Scope, EventImage, EventLink, UserEvent
 from ..locations.serializers import LocationSerializer
@@ -19,6 +20,14 @@ class EventImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = EventImage
         fields = ["image_url"]
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        images_domain = settings.IMAGES_DOMAIN
+
+        if instance.image_url:
+            representation["image_url"] = f"{images_domain}{instance.image_url}"
+        return representation
 
 
 class EventLinkSerializer(serializers.ModelSerializer):

@@ -1,4 +1,5 @@
 import pandas as pd
+import urllib.parse
 
 from apps.events.models import EventImage
 
@@ -11,9 +12,7 @@ def import_images(row, event):
     result = []
 
     for image_url in images_array:
-        image, created = EventImage.objects.get_or_create(image_url=parse_image(image_url), event_id=event.id)
+        encoded_url = urllib.parse.quote(image_url, safe=":/")
+        image, created = EventImage.objects.get_or_create(image_url=encoded_url, event_id=event.id)
         result.append(image)
     return result
-
-def parse_image(image_string):
-    return image_string.split("/")[-1]

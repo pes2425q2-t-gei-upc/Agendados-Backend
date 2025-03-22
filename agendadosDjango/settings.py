@@ -151,3 +151,5 @@ SWAGGER_SETTINGS = {
     },
     'USE_SESSION_AUTH': False,
 }
+
+IMAGES_DOMAIN = os.getenv("IMAGES_DOMAIN")

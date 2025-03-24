@@ -23,7 +23,7 @@ class EventImageSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        images_domain = settings.IMAGES_DOMAIN
+        images_domain = "https://agenda.cultura.gencat.cat"
 
         if instance.image_url:
             representation["image_url"] = f"{images_domain}{instance.image_url}"

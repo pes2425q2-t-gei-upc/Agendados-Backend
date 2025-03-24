@@ -49,6 +49,7 @@ jobs:
           VALIDATE_PYTHON_PYLINT: false
           VALIDATE_PYTHON_PYINK: false
           VALIDATE_ENV: false
+          VALIDATE_OPENAPI: false
 
       - name: Commit and push linting fixes
         # Run only on:

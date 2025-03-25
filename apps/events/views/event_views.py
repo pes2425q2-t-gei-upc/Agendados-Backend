@@ -5,8 +5,9 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from apps.events.models import Event
+from apps.events.models import Event, Category
 from apps.events.serializers import EventSerializer, EventSummarizedSerializer
+from apps.events.services.event_recommender import event_recommender
 
 
 @api_view(["GET"])
@@ -34,7 +35,7 @@ def get_recommended_events(request):
 
     user = request.user
 
-    events = Event.objects.exclude(Q(attendees=user) | Q(discarded_by=user))[:limit]
+    events = event_recommender(user, limit)
     serializer = EventSerializer(events, many=True)
     return Response(serializer.data)
 

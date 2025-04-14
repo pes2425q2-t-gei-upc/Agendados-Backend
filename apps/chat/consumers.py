@@ -44,7 +44,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         }))
 
     async def save_message(self, message):
-        print('Saving message:', message)
         await database_sync_to_async(self._save_message)(message)
 
     def _save_message(self, message):

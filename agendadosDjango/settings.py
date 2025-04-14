@@ -45,6 +45,8 @@ INSTALLED_APPS = [
     "apps.events",
     "apps.locations",
     "apps.importer",
+    "apps.chat",
+    "channels",
     "corsheaders",
 ]
 
@@ -80,6 +82,8 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "agendadosDjango.wsgi.application"
+
+ASGI_APPLICATION = 'agendadosDjango.asgi.application'
 
 
 # Database

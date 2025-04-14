@@ -10,6 +10,7 @@ django.setup()
 
 from apps import chat
 import apps.chat.routing
+from apps.chat.auth_middleware import TokenAuthMiddleware
 
 application = ProtocolTypeRouter({
     "http": get_asgi_application(),
@@ -19,3 +20,5 @@ application = ProtocolTypeRouter({
         )
     ),
 })
+
+application = TokenAuthMiddleware(application)

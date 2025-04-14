@@ -11,6 +11,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
         self.event_id = self.scope['url_route']['kwargs']['event_id']
         self.room_group_name = f'event_{self.event_id}'
 
+        user = self.scope['user']
+        if not user.is_authenticated:
+            print('User not authenticated, closing connection')
+            await self.close()
+            return
+
         await self.channel_layer.group_add(
             self.room_group_name,
             self.channel_name
@@ -47,9 +53,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await database_sync_to_async(self._save_message)(message)
 
     def _save_message(self, message):
+        user = self.scope['user']
+
         chat_message = Message.objects.create(
             event_id=self.event_id,
             content=message,
-            sender_id=2
+            sender_id=user.id
         )
         chat_message.save()

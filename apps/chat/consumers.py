@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
@@ -23,6 +24,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
         )
         await self.accept()
 
+        #Send message history to the user
+        await self.send_message_history()
+
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard(
             self.room_group_name,
@@ -33,31 +37,61 @@ class ChatConsumer(AsyncWebsocketConsumer):
         text_data_json = json.loads(text_data)
         message = text_data_json['message']
 
-        await self.save_message(message)
+        user = self.scope['user']
+        saved_message = await self.save_message(message)
+        message_timestamp = saved_message.timestamp.strftime('%Y-%m-%d %H:%M:%S')
 
         await self.channel_layer.group_send(
             self.room_group_name,
             {
                 'type': 'chat_message',
-                'message': message
+                'message': message,
+                'username': user.username,
+                'user_id': user.id,
+                'timestamp': message_timestamp
             }
         )
 
     async def chat_message(self, event):
-        message = event['message']
         await self.send(text_data=json.dumps({
-            'message': message
+            'message': event['message'],
+            'username': event['username'],
+            'user_id': event['user_id'],
+            'timestamp': event['timestamp']
         }))
 
-    async def save_message(self, message):
-        await database_sync_to_async(self._save_message)(message)
-
-    def _save_message(self, message):
+    @database_sync_to_async
+    def save_message(self, message):
         user = self.scope['user']
-
         chat_message = Message.objects.create(
             event_id=self.event_id,
             content=message,
             sender_id=user.id
         )
-        chat_message.save()
+        return chat_message
+
+    async def send_message_history(self):
+        messages = await self.get_message_history()
+
+        if messages:
+            await self.send(text_data=json.dumps({
+                'message_history': messages
+            }))
+
+    @database_sync_to_async
+    def get_message_history(self):
+        messages = Message.objects.filter(
+            event_id=self.event_id
+        ).order_by('timestamp')
+
+        history = []
+        for msg in messages:
+            username = msg.sender.username
+
+            history.append({
+                'message': msg.content,
+                'username': username,
+                'user_id': msg.sender_id,
+                'timestamp': msg.timestamp.strftime('%Y-%m-%d %H:%M:%S')
+            })
+        return history

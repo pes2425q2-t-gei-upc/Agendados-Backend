@@ -1,8 +1,14 @@
 from django.urls import path
-from . import views
+from apps.users.views import auth_views, friendship_views
 
 urlpatterns = [
-    path("login", views.login, name="login"),
-    path("signup", views.signup, name="signup"),
-    path("test", views.test, name="test"),
+    #Auth urls
+    path("login", auth_views.login, name="login"),
+    path("signup", auth_views.signup, name="signup"),
+    path("test", auth_views.test, name="test"),
+    #Friendship urls
+    path("friendships", friendship_views.get_friendships, name="friendships"),
+    path("friendships/<int:user_id>", friendship_views.send_friend_request, name="send_friend_request"),
+    path("friendships/accept/<int:request_id>", friendship_views.accept_friend_request, name="accept_friend_request"),
+    path("friendships/decline/<int:request_id>", friendship_views.decline_friend_request, name="decline_friend_request"),
 ]

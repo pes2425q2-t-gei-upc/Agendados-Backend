@@ -1,5 +1,5 @@
 import json
-from datetime import datetime
+from django.utils.timezone import localtime
 
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
@@ -39,7 +39,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         user = self.scope['user']
         saved_message = await self.save_message(message)
-        message_timestamp = saved_message.timestamp.strftime('%Y-%m-%d %H:%M:%S')
+        message_timestamp = localtime(saved_message.timestamp).strftime('%Y-%m-%d %H:%M:%S')
 
         await self.channel_layer.group_send(
             self.room_group_name,
@@ -87,11 +87,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
         history = []
         for msg in messages:
             username = msg.sender.username
+            message_timestamp = localtime(msg.timestamp).strftime('%Y-%m-%d %H:%M:%S')
 
             history.append({
                 'message': msg.content,
                 'username': username,
                 'user_id': msg.sender_id,
-                'timestamp': msg.timestamp.strftime('%Y-%m-%d %H:%M:%S')
+                'timestamp': message_timestamp
             })
         return history

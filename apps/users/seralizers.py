@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 
+from apps.users.models import UserProfile
+
 
 class UserSerializer(serializers.ModelSerializer):
     language = serializers.SerializerMethodField()

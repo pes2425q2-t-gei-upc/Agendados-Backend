@@ -20,5 +20,5 @@ class FriendRequest(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.user_from.username} -> {self.user_to.username}"
+        return f"{self.user_from.__str__()} -> {self.user_to.__str__()}"
 

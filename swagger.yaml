@@ -387,3 +387,92 @@ paths:
           description: ''
       tags:
       - events
+
+  /api/users/friendships:
+    get:
+      operationId: listget_friendships
+      description: 'Obtiene todas las amistades del usuario autenticado'
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    username:
+                      type: string
+                    email:
+                      type: string
+          description: 'Lista de amigos del usuario'
+      security:
+        - TokenAuth: []
+      tags:
+        - users
+
+  /api/users/friendships/{user_id}:
+    post:
+      operationId: send_friend_request
+      description: 'Envía una solicitud de amistad a otro usuario'
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: 'ID del usuario al que se enviará la solicitud'
+          schema:
+            type: integer
+      responses:
+        '201':
+          description: 'Solicitud enviada con éxito o amistad creada automáticamente'
+        '400':
+          description: 'Error al enviar la solicitud (mismo usuario, ya son amigos o solicitud ya existente)'
+      security:
+        - TokenAuth: []
+      tags:
+        - users
+
+  /api/users/friendships/accept/{request_id}:
+    post:
+      operationId: accept_friend_request
+      description: 'Acepta una solicitud de amistad pendiente'
+      parameters:
+        - name: request_id
+          in: path
+          required: true
+          description: 'ID de la solicitud de amistad a aceptar'
+          schema:
+            type: integer
+      responses:
+        '201':
+          description: 'Solicitud aceptada y amistad creada con éxito'
+        '404':
+          description: 'Solicitud no encontrada o no dirigida al usuario actual'
+      security:
+        - TokenAuth: []
+      tags:
+        - users
+
+  /api/users/friendships/decline/{request_id}:
+    delete:
+      operationId: decline_friend_request
+      description: 'Rechaza una solicitud de amistad pendiente'
+      parameters:
+        - name: request_id
+          in: path
+          required: true
+          description: 'ID de la solicitud de amistad a rechazar'
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 'Solicitud rechazada con éxito'
+        '404':
+          description: 'Solicitud no encontrada o no dirigida al usuario actual'
+      security:
+        - TokenAuth: []
+      tags:
+        - users

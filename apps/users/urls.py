@@ -8,4 +8,7 @@ urlpatterns = [
     path("test", auth_views.test, name="test"),
     #Friendship urls
     path("friendships", friendship_views.get_friendships, name="friendships"),
+    path("friendships/<int:user_id>", friendship_views.send_friend_request, name="send_friend_request"),
+    path("friendships/accept/<int:request_id>", friendship_views.accept_friend_request, name="accept_friend_request"),
+    path("friendships/decline/<int:request_id>", friendship_views.decline_friend_request, name="decline_friend_request"),
 ]

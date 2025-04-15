@@ -48,6 +48,6 @@ USER appuser
 EXPOSE 8000
 
 # Start the application using Gunicorn (by the moment run it in development mode)
-#CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "agendadosDjango.asgi:application"]
+CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "agendadosDjango.asgi:application"]
 
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+#CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]

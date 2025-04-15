@@ -45,6 +45,8 @@ INSTALLED_APPS = [
     "apps.events",
     "apps.locations",
     "apps.importer",
+    "apps.chat",
+    "channels",
     "corsheaders",
 ]
 
@@ -80,6 +82,8 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "agendadosDjango.wsgi.application"
+
+ASGI_APPLICATION = 'agendadosDjango.asgi.application'
 
 
 # Database
@@ -122,7 +126,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = 'Europe/Madrid'
 
 USE_I18N = True
 
@@ -150,4 +154,13 @@ SWAGGER_SETTINGS = {
         }
     },
     'USE_SESSION_AUTH': False,
+}
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('redis', 6379)],
+        },
+    },
 }

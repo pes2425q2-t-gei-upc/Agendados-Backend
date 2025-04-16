@@ -476,3 +476,44 @@ paths:
         - TokenAuth: []
       tags:
         - users
+
+  /api/users:
+    get:
+      tags:
+        - users
+      description: |
+        Permite buscar usuarios utilizando un parámetro de consulta.
+        Si no se proporciona un parámetro de búsqueda o está vacío, devuelve todos los usuarios.
+        El usuario autenticado siempre es excluido de los resultados.
+      parameters:
+        - name: query
+          in: query
+          description: Término de búsqueda para filtrar usuarios (busca en username, first_name, last_name, email)
+          required: false
+          schema:
+            type: string
+      security:
+        - TokenAuth: [ ]
+      responses:
+        '200':
+          description: Operación exitosa
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    username:
+                      type: string
+                    first_name:
+                      type: string
+                    last_name:
+                      type: string
+                    email:
+                      type: string
+                      format: email
+        '401':
+          description: No autorizado - Token de autenticación inválido o no proporcionado

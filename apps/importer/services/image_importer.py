@@ -2,7 +2,9 @@ from uuid import uuid4
 
 import pandas as pd
 import urllib.parse
-
+import boto3
+import io
+from django.conf import settings
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 
@@ -16,6 +18,13 @@ def import_images(row, event):
     images_array = images_string.split(",")
     result = []
 
+    s3_client = boto3.client(
+        's3',
+        aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+        region_name=settings.AWS_S3_REGION_NAME
+    )
+
     for image_url in images_array:
         try:
             encoded_url = urllib.parse.quote(image_url, safe=":/")
@@ -25,20 +34,25 @@ def import_images(row, event):
             #Download image data
             with urllib.request.urlopen(image_url) as response:
                 image_data = response.read()
-            s3_path = default_storage.save(image_name, ContentFile(image_data))
-            s3_url = default_storage.url(s3_path)
+
+            s3_client.upload_fileobj(
+                io.BytesIO(image_data),
+                settings.AWS_STORAGE_BUCKET_NAME,
+                image_name,
+                ExtraArgs={'ContentType': 'image/jpeg'}
+            )
+
+            # Generar URL de S3
+            s3_url = f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/{image_name}"
 
             image, created = EventImage.objects.get_or_create(
                 event_id=event.id,
                 defaults={
-                    'image_url': encoded_url,
-                    's3_url': s3_url,
-                    's3_key': image_name
+                    'image_url': s3_url,
                 }
             )
             if not created:
-                image.s3_url = s3_url
-                image.s3_key = image_name
+                image.image_url = s3_url
                 image.save()
 
             result.append(image)

@@ -1,11 +1,11 @@
 openapi: 3.0.2
 info:
-  title: ''
-  version: ''
+  title: ""
+  version: ""
 
 servers:
-  - url: "http://localhost:8000"
-    description: "Servidor local"
+  - url: "https://agendados-backend-842309366027.europe-southwest1.run.app"
+    description: "Servidor en producción"
 
 components:
   securitySchemes:
@@ -22,22 +22,22 @@ paths:
   /api/events/:
     get:
       operationId: listget_all_events
-      description: ''
+      description: ""
       parameters: []
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
                 type: array
                 items: {}
-          description: ''
+          description: ""
       tags:
-      - events
+        - events
   /api/events/recommended:
     get:
       operationId: listget_recommended_events
-      description: ''
+      description: ""
       parameters:
         - name: limit
           in: query
@@ -47,124 +47,124 @@ paths:
             type: integer
             example: 50
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
                 type: array
-                items: { }
-          description: ''
+                items: {}
+          description: ""
       tags:
         - events
   /api/events/categories:
     get:
       operationId: listget_all_categories
-      description: ''
+      description: ""
       parameters: []
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
                 type: array
                 items: {}
-          description: ''
+          description: ""
       tags:
-      - events
+        - events
   /api/events/{event_id}:
     get:
       operationId: retrieveget_event_details
-      description: ''
+      description: ""
       parameters:
-      - name: event_id
-        in: path
-        required: true
-        description: ''
-        schema:
-          type: string
+        - name: event_id
+          in: path
+          required: true
+          description: ""
+          schema:
+            type: string
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema: {}
-          description: ''
+          description: ""
       tags:
-      - events
+        - events
   /api/events/favorites:
     get:
       operationId: listget_user_favorites
-      description: ''
+      description: ""
       parameters: []
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
                 type: array
                 items: {}
-          description: ''
+          description: ""
       tags:
-      - events
+        - events
   /api/events/discarded:
     get:
       operationId: listget_user_discardeds
-      description: ''
+      description: ""
       parameters: []
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
                 type: array
                 items: {}
-          description: ''
+          description: ""
       tags:
-      - events
+        - events
   /api/locations/:
     get:
       operationId: listget_all_locations
-      description: ''
+      description: ""
       parameters: []
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
                 type: array
                 items: {}
-          description: ''
+          description: ""
       tags:
-      - locations
+        - locations
   /api/locations/regions:
     get:
       operationId: listget_all_regions
-      description: ''
+      description: ""
       parameters: []
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
                 type: array
                 items: {}
-          description: ''
+          description: ""
       tags:
-      - locations
+        - locations
   /api/locations/towns:
     get:
       operationId: listget_all_towns
-      description: ''
+      description: ""
       parameters: []
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
                 type: array
                 items: {}
-          description: ''
+          description: ""
       tags:
-      - locations
+        - locations
   /api/users/login:
     post:
       operationId: createlogin
@@ -220,7 +220,7 @@ paths:
                     type: string
                     example: "Invalid credentials"
       tags:
-      - users
+        - users
   /api/users/signup:
     post:
       operationId: createsignup
@@ -248,7 +248,7 @@ paths:
                 - email
                 - password
       responses:
-        '201':
+        "201":
           description: "Usuario creado exitosamente y token generado."
           content:
             application/json:
@@ -270,7 +270,7 @@ paths:
                 required:
                   - token
                   - user
-        '400':
+        "400":
           description: "Datos inválidos para crear el usuario."
           content:
             application/json:
@@ -285,7 +285,7 @@ paths:
   /api/users/test:
     post:
       operationId: createtest
-      description: ''
+      description: ""
       parameters: []
       requestBody:
         content:
@@ -296,24 +296,24 @@ paths:
           multipart/form-data:
             schema: {}
       responses:
-        '201':
+        "201":
           content:
             application/json:
               schema: {}
-          description: ''
+          description: ""
       tags:
-      - users
+        - users
   /api/events/{event_id}/favorites:
     post:
       operationId: createadd_or_remove_favorites
-      description: ''
+      description: ""
       parameters:
-      - name: event_id
-        in: path
-        required: true
-        description: ''
-        schema:
-          type: string
+        - name: event_id
+          in: path
+          required: true
+          description: ""
+          schema:
+            type: string
       requestBody:
         content:
           application/json:
@@ -323,39 +323,39 @@ paths:
           multipart/form-data:
             schema: {}
       responses:
-        '201':
+        "201":
           content:
             application/json:
               schema: {}
-          description: ''
+          description: ""
       tags:
-      - events
+        - events
     delete:
       operationId: destroyadd_or_remove_favorites
-      description: ''
+      description: ""
       parameters:
-      - name: event_id
-        in: path
-        required: true
-        description: ''
-        schema:
-          type: string
+        - name: event_id
+          in: path
+          required: true
+          description: ""
+          schema:
+            type: string
       responses:
-        '204':
-          description: ''
+        "204":
+          description: ""
       tags:
-      - events
+        - events
   /api/events/{event_id}/discarded:
     post:
       operationId: createadd_or_remove_discarded
-      description: ''
+      description: ""
       parameters:
-      - name: event_id
-        in: path
-        required: true
-        description: ''
-        schema:
-          type: string
+        - name: event_id
+          in: path
+          required: true
+          description: ""
+          schema:
+            type: string
       requestBody:
         content:
           application/json:
@@ -365,25 +365,25 @@ paths:
           multipart/form-data:
             schema: {}
       responses:
-        '201':
+        "201":
           content:
             application/json:
               schema: {}
-          description: ''
+          description: ""
       tags:
-      - events
+        - events
     delete:
       operationId: destroyadd_or_remove_discarded
-      description: ''
+      description: ""
       parameters:
-      - name: event_id
-        in: path
-        required: true
-        description: ''
-        schema:
-          type: string
+        - name: event_id
+          in: path
+          required: true
+          description: ""
+          schema:
+            type: string
       responses:
-        '204':
-          description: ''
+        "204":
+          description: ""
       tags:
-      - events
+        - events

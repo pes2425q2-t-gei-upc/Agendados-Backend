@@ -104,7 +104,7 @@
     }
 
     // Establecer la conexión WebSocket, incluyendo el token en los parámetros de la URL
-    const socket = new WebSocket(`ws://localhost:8000/ws/chat/event/43/?token=${token}`);
+    const socket = new WebSocket(`ws://agendados-backend-842309366027.europe-southwest1.run.app/ws/chat/event/43/?token=${token}`);
 
     // Cuando se abra la conexión, mostrar un mensaje
     socket.onopen = function(e) {

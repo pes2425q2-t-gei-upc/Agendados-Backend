@@ -11,7 +11,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     env_file:
-      - .env.local
+      - .env
 
 
   django-web:
@@ -37,7 +37,7 @@ services:
     volumes:
       - .:/app
     env_file:
-      - .env.local
+      - .env
 
 volumes:
    postgres_data:

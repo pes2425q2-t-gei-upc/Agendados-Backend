@@ -5,7 +5,9 @@ services:
       - "6379:6379"
 
   db:
-    image: postgres:17
+    build: # Usa el Dockerfile.db para construir la imagen de la BD
+      context: .
+      dockerfile: Dockerfile.db
     environment:
       POSTGRES_DB: ${DATABASE_NAME}
       POSTGRES_USER: ${DATABASE_USERNAME}
@@ -16,6 +18,23 @@ services:
       - postgres_data:/var/lib/postgresql/data
     env_file:
       - .env
+
+    command:
+      - postgres
+      - -c
+      - listen_addresses=*
+      - -c
+      - shared_preload_libraries=pglogical
+      - -c
+      - wal_level=logical
+      - -c
+      - wal_sender_timeout=0
+      - -c
+      - max_wal_senders=10
+      - -c
+      - max_replication_slots=10
+
+    restart: unless-stopped
 
   django-web:
     build: .
@@ -43,4 +62,4 @@ services:
       - .env
 
 volumes:
-  postgres_data:
+   postgres_data:

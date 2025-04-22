@@ -6,6 +6,8 @@ info:
 servers:
   - url: "http://localhost:8000"
     description: "Servidor local"
+  - url: "https://agendados-backend-842309366027.europe-southwest1.run.app"
+    description: "Servidor producción"
 
 components:
   securitySchemes:

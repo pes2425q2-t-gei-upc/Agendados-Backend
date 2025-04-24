@@ -43,15 +43,10 @@ def import_images(row, event):
             # Generar URL de S3
             s3_url = f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com/{image_name}"
 
-            image, created = EventImage.objects.get_or_create(
-                event_id=event.id,
-                defaults={
-                    'image_url': s3_url,
-                }
+            image = EventImage.objects.create(
+                event=event,
+                image_url=s3_url
             )
-            if not created:
-                image.image_url = s3_url
-                image.save()
 
             result.append(image)
         except Exception as e:

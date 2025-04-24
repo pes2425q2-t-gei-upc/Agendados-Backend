@@ -8,7 +8,7 @@ from django.db.models import Q
 from django.contrib.auth.models import User
 
 from apps.users.models import Friendship, FriendRequest
-from apps.users.seralizers import UserSerializer
+from apps.users.seralizers import UserSerializer, FriendRequestSerializer
 
 
 @api_view(["GET"])
@@ -126,3 +126,15 @@ def decline_friend_request(request, request_id):
     friend_request.delete()
 
     return Response(status=status.HTTP_200_OK)
+
+
+@api_view(["GET"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def get_pending_friend_requests(request):
+    user = request.user
+
+    pending_requests = FriendRequest.objects.filter(user_to=user)
+    serializer = FriendRequestSerializer(pending_requests, many=True)
+
+    return Response(serializer.data)

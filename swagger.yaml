@@ -4,7 +4,7 @@ info:
   version: ''
 
 servers:
-  - url: "http://localhost:8000"
+  - url: "http://localhost:8080"
     description: "Servidor local"
   - url: "https://agendados-backend-842309366027.europe-southwest1.run.app"
     description: "Servidor producción"
@@ -479,7 +479,7 @@ paths:
       tags:
         - users
 
-  /api/users:
+  /api/users/:
     get:
       tags:
         - users
@@ -519,3 +519,46 @@ paths:
                       format: email
         '401':
           description: No autorizado - Token de autenticación inválido o no proporcionado
+
+  /api/users/friendships/pending:
+    get:
+      operationId: get_pending_friend_requests
+      description: 'Obtiene todas las solicitudes de amistad pendientes dirigidas al usuario autenticado'
+      parameters: [ ]
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    user_from:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        username:
+                          type: string
+                        email:
+                          type: string
+                    user_to:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        username:
+                          type: string
+                        email:
+                          type: string
+                    created_at:
+                      type: string
+                      format: date-time
+          description: 'Lista de solicitudes de amistad pendientes'
+      security:
+        - TokenAuth: [ ]
+      tags:
+        - users

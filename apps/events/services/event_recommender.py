@@ -1,6 +1,5 @@
-from django.db.models import Count, ExpressionWrapper, FloatField, Q, F
-from django.db.models.functions import Coalesce
-from django.utils import timezone
+from django.db.models import Count, ExpressionWrapper, FloatField, Q, F, DurationField
+from django.db.models.functions import Coalesce, Now, Extract
 
 from apps.events.models import Category, Event
 from apps.users.models import Friendship, User 
@@ -49,8 +48,13 @@ def event_recommender(user, limit):
     # Popularidad y recencia
     events = events.annotate(
         popularity=Coalesce(Count("attendees"), 0),
+        time_diff=ExpressionWrapper(
+            F("date_ini") - Now(),
+            output_field=DurationField()
+        ),
+    ).annotate(
         recency=ExpressionWrapper(
-            1.0 / (F("date_ini") - timezone.now()).seconds,
+            1.0 / Extract("time_diff", "epoch"),
             output_field=FloatField(),
         ),
     )

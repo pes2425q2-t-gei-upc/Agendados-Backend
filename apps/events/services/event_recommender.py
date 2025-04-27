@@ -1,36 +1,22 @@
-from django.db.models import Count, ExpressionWrapper, FloatField
-from django.db.models import Q, F
-from django.db.models.functions import Coalesce
+from django.db.models import Count, ExpressionWrapper, FloatField, Q, F, DurationField
+from django.db.models.functions import Coalesce, Now, Extract
 
 from apps.events.models import Category, Event
-
+from apps.users.models import Friendship, User 
 
 def event_recommender(user, limit):
-    # Count how many events the user has attended per category
+    # Categorías favoritas / descartadas
     favorite_categories = Category.objects.filter(events__attendees=user).annotate(
         favorite_count=Count("events", filter=Q(events__attendees=user))
     )
-
-    # Count how many events the user has discarded per category
     discarded_categories = Category.objects.filter(events__discarded_by=user).annotate(
         discarded_count=Count("events", filter=Q(events__discarded_by=user))
     )
 
-    # Create a dictionary to store category weights based on favorites and discards
-    category_weights = {}
-    for category in favorite_categories:
-        category_weights[category.id] = {"favorites": category.favorite_count, "discarded": 0}
-    for category in discarded_categories:
-        if category.id in category_weights:
-            category_weights[category.id]["discarded"] = category.discarded_count
-        else:
-            category_weights[category.id] = {"favorites": 0, "discarded": category.discarded_count}
-    print(category_weights)
-
-    # Get all available events excluding those already attended or discarded
+    #  Base de eventos
     events = Event.objects.exclude(Q(attendees=user) | Q(discarded_by=user))
 
-    # Apply a weight based on the favorite/discarded relationship
+    # Peso categorías
     events = events.annotate(
         favorite_count=Coalesce(
             Count("categories", filter=Q(categories__in=favorite_categories)), 0
@@ -39,13 +25,58 @@ def event_recommender(user, limit):
             Count("categories", filter=Q(categories__in=discarded_categories)), 0
         ),
     ).annotate(
-        # Weight calculation: +1 for each favorite, -0.5 for each discarded (avoids negative weight)
         weight=ExpressionWrapper(
-            F("favorite_count") - (F("discarded_count") * 0.5),
+            F("favorite_count") - F("discarded_count") * 0.5,
             output_field=FloatField(),
         )
-    ).order_by("-weight")
+    )
 
-    # Return the top recommended events based on the calculated weight
-    recommended_events = events[:limit]
-    return recommended_events
+    # Factor social: cuantos amigos asisten
+    # obtenemos IDs de amigos desde el modelo Friendship
+    friend_ids = Friendship.objects.filter(
+        Q(user1=user) | Q(user2=user)
+    ).values_list("user1_id", "user2_id")
+    # aplanamos y excluimos al propio user
+    flat_ids = set(sum((list(t) for t in friend_ids), [])) - {user.id}
+    friends = User.objects.filter(id__in=flat_ids)
+    events = events.annotate(
+        friend_count=Coalesce(
+            Count("attendees", filter=Q(attendees__in=friends)), 0
+        )
+    )
+
+    # Popularidad y recencia
+    events = events.annotate(
+        popularity=Coalesce(Count("attendees"), 0),
+        time_diff=ExpressionWrapper(
+            F("date_ini") - Now(),
+            output_field=DurationField()
+        ),
+    ).annotate(
+        recency=ExpressionWrapper(
+            1.0 / Extract("time_diff", "epoch"),
+            output_field=FloatField(),
+        ),
+    )
+
+    # Score final combinando señales
+    events = events.annotate(
+        final_score=ExpressionWrapper(
+            F("weight") * 0.4
+            + F("friend_count") * 0.3
+            + F("popularity") * 0.2
+            + F("recency") * 0.1,
+            output_field=FloatField(),
+        )
+    ).order_by("-final_score")
+
+    # Añadir un 10% de 'explore' aleatorio
+    explore_count = int(limit * 0.1)
+    main_count = limit - explore_count
+
+    main = list(events[:main_count])
+    explore = list(
+        Event.objects.exclude(id__in=[e.id for e in main]).order_by("?")[:explore_count]
+    )
+
+    return main + explore

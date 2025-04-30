@@ -284,6 +284,57 @@ paths:
                     example: "Error al crear el usuario, los datos no son válidos."
       tags:
         - users
+  /api/users/update-password:
+    post:
+      operationId: update_password
+      description: "Actualiza la contraseña del usuario autenticado."
+      security:
+        - TokenAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                current_password:
+                  type: string
+                  format: password
+                  example: "contraseñaActual123"
+                  description: "Contraseña actual del usuario"
+                new_password:
+                  type: string
+                  format: password
+                  example: "nuevaContraseña456"
+                  description: "Nueva contraseña para el usuario (mínimo 8 caracteres)"
+              required:
+                - current_password
+                - new_password
+      responses:
+        '200':
+          description: "Contraseña actualizada correctamente"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Contraseña actualizada correctamente"
+        '400':
+          description: "Error en la actualización de la contraseña"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "La contraseña actual es incorrecta o la nueva contraseña no cumple los requisitos"
+        '401':
+          description: "No autorizado - Token de autenticación inválido o no proporcionado"
+      tags:
+        - users
   /api/users/test:
     post:
       operationId: createtest

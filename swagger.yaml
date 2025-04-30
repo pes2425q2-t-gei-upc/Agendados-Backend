@@ -614,7 +614,7 @@ paths:
       tags:
         - users
 
-  /eventsInArea:
+  /api/eventsInArea:
     get:
       operationId: get_events_in_area
       description: 'Obtiene eventos dentro de un área geográfica especificada por coordenadas'

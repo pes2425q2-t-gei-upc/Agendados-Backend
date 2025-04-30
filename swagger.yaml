@@ -613,3 +613,67 @@ paths:
         - TokenAuth: [ ]
       tags:
         - users
+
+  /eventsInArea:
+    get:
+      operationId: get_events_in_area
+      description: 'Obtiene eventos dentro de un área geográfica especificada por coordenadas'
+      parameters:
+        - name: lat_min
+          in: query
+          required: true
+          description: 'Latitud mínima del área'
+          schema:
+            type: number
+            format: float
+            example: 41.395
+        - name: lat_max
+          in: query
+          required: true
+          description: 'Latitud máxima del área'
+          schema:
+            type: number
+            format: float
+            example: 41.412
+        - name: lon_min
+          in: query
+          required: true
+          description: 'Longitud mínima del área'
+          schema:
+            type: number
+            format: float
+            example: 2.145
+        - name: lon_max
+          in: query
+          required: true
+          description: 'Longitud máxima del área'
+          schema:
+            type: number
+            format: float
+            example: 2.165
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { }
+          description: 'Lista de eventos dentro del área especificada'
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+              examples:
+                missing_parameters:
+                  value:
+                    error: "Missing required parameters"
+                invalid_format:
+                  value:
+                    error: "Coordinate parameters must be valid numbers"
+          description: 'Error en los parámetros de la solicitud'
+      tags:
+        - external-service

@@ -1,216 +1,320 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Conexión WebSocket - Chat</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f4f4f9;
-        }
-        h1 {
-            color: #333;
-        }
-        #messages {
-            width: 100%;
-            height: 300px;
-            border: 1px solid #ccc;
-            margin-bottom: 20px;
-            padding: 10px;
-            background-color: #fff;
-            overflow-y: scroll;
-        }
-        .message {
-            margin-bottom: 10px;
-            padding: 8px;
-            border-radius: 5px;
-            background-color: #e9e9e9;
-        }
-        .message-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 5px;
-            font-size: 0.85em;
-        }
-        .username {
-            font-weight: bold;
-            color: #007BFF;
-        }
-        .timestamp {
-            color: #666;
-        }
-        .message-content {
-            word-wrap: break-word;
-        }
-        .system-message {
-            font-style: italic;
-            color: #666;
-            margin-bottom: 5px;
-        }
-        .history-divider {
-            text-align: center;
-            color: #666;
-            margin: 10px 0;
-            position: relative;
-        }
-        .history-divider:before {
-            content: "";
-            display: block;
-            height: 1px;
-            background: #ccc;
-            position: absolute;
-            top: 50%;
-            width: 100%;
-            z-index: 1;
-        }
-        .history-divider span {
-            background: #fff;
-            padding: 0 10px;
-            position: relative;
-            z-index: 2;
-        }
-        #messageInput {
-            width: calc(100% - 20px);
-            padding: 10px;
-            margin-bottom: 10px;
-            font-size: 16px;
-        }
-        button {
-            padding: 10px 20px;
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background-color: #f4f4f9;
+      }
+      h1 {
+        color: #333;
+      }
+      #messages {
+        width: 100%;
+        height: 300px;
+        border: 1px solid #ccc;
+        margin-bottom: 20px;
+        padding: 10px;
+        background-color: #fff;
+        overflow-y: scroll;
+      }
+      .message {
+        margin-bottom: 10px;
+        padding: 8px;
+        border-radius: 5px;
+        background-color: #e9e9e9;
+      }
+      .message-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 5px;
+        font-size: 0.85em;
+      }
+      .username {
+        font-weight: bold;
+        color: #007bff;
+      }
+      .timestamp {
+        color: #666;
+      }
+      .message-content {
+        word-wrap: break-word;
+      }
+      .system-message {
+        font-style: italic;
+        color: #666;
+        margin-bottom: 5px;
+      }
+      .history-divider {
+        text-align: center;
+        color: #666;
+        margin: 10px 0;
+        position: relative;
+      }
+      .history-divider:before {
+        content: "";
+        display: block;
+        height: 1px;
+        background: #ccc;
+        position: absolute;
+        top: 50%;
+        width: 100%;
+        z-index: 1;
+      }
+      .history-divider span {
+        background: #fff;
+        padding: 0 10px;
+        position: relative;
+        z-index: 2;
+      }
+      #messageInput {
+        width: calc(100% - 20px);
+        padding: 10px;
+        margin-bottom: 10px;
+        font-size: 16px;
+      }
+      button {
+        padding: 10px 20px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: #0056b3;
+      }
+      .delete-button {
+        background: none;
+        border: none;
+        color: #ff4d4d;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+        padding: 0 5px;
+        margin-left: 5px;
+        display: inline-block; /* Siempre mostrado */
+      }
+      /* Eliminar el hover para mostrar siempre el botón
+      .message:hover .delete-button {
+        display: inline-block;
+      }
+      */
+      .deleted-message {
+        font-style: italic;
+        color: #999;
+      }
     </style>
-</head>
-<body>
-<h1>Chat WebSocket</h1>
-<div id="messages"></div>
-<input id="messageInput" type="text" placeholder="Escribe tu mensaje aquí...">
-<button id="sendButton">Enviar</button>
+  </head>
+  <body>
+    <h1>Chat WebSocket</h1>
+    <div id="messages"></div>
+    <input
+      id="messageInput"
+      type="text"
+      placeholder="Escribe tu mensaje aquí..."
+    />
+    <button id="sendButton">Enviar</button>
 
-<script>
-    const token = 'cef830d7430981641e14f16126d028a28b3fb1de'
-    if (!token) {
+    <script>
+      const token = "cef830d7430981641e14f16126d028a28b3fb1de";
+      if (!token) {
         alert("No se ha encontrado el token de autenticación.");
         // Aquí puedes redirigir a login o mostrar un mensaje de error.
-    }
+      }
 
-    // Establecer la conexión WebSocket, incluyendo el token en los parámetros de la URL
-    const socket = new WebSocket(`wss://agendados-backend-842309366027.europe-southwest1.run.app/ws/chat/event/43/?token=${token}`);
+      let currentUserId = null; // Para almacenar el ID del usuario actual
 
-    // Cuando se abra la conexión, mostrar un mensaje
-    socket.onopen = function(e) {
+      // Establecer la conexión WebSocket, incluyendo el token en los parámetros de la URL
+      const socket = new WebSocket(
+        `wss://agendados-backend-842309366027.europe-southwest1.run.app/ws/chat/event/43/?token=${token}`
+      );
+
+      // Cuando se abra la conexión, mostrar un mensaje
+      socket.onopen = function (e) {
         console.log("Conexión WebSocket establecida.");
         addSystemMessage("Conexión establecida con el servidor.");
-    };
+      };
 
-    // Cuando se reciba un mensaje, agregarlo a la interfaz
-    socket.onmessage = function(e) {
-        console.log("Mensaje recibido:", e.data);  // Para depuración
+      // Cuando se reciba un mensaje, agregarlo a la interfaz
+      socket.onmessage = function (e) {
+        console.log("Mensaje recibido:", e.data); // Para depuración
 
         const data = JSON.parse(e.data);
 
         // Comprobar si es un historial de mensajes
         if (data.message_history) {
-            console.log("Historial recibido:", data.message_history.length, "mensajes");  // Para depuración
-            loadMessageHistory(data.message_history);
+          console.log(
+            "Historial recibido:",
+            data.message_history.length,
+            "mensajes"
+          ); // Para depuración
+          loadMessageHistory(data.message_history);
+          // Si hay un user_id en el primer mensaje, asumimos que es el usuario actual
+          if (data.message_history.length > 0) {
+            currentUserId = data.user_id;
+          }
         }
         // Si es un mensaje individual
         else if (data.message) {
-            // Si el mensaje contiene información de usuario, mostrarla
-            if (data.username) {
-                addUserMessage(data.username, data.message, data.timestamp);
-            } else {
-                // Para compatibilidad con mensajes antiguos que no tienen esta información
-                addSystemMessage(data.message);
-            }
+          // Si el mensaje contiene información de usuario, mostrarla
+          if (data.username) {
+            addUserMessage(
+              data.username,
+              data.message,
+              data.timestamp,
+              data.message_id,
+              data.user_id
+            );
+          } else {
+            // Para compatibilidad con mensajes antiguos que no tienen esta información
+            addSystemMessage(data.message);
+          }
         }
-    };
+        // Si es una confirmación de eliminación de mensaje
+        else if (data.deleted_message_id) {
+          handleDeletedMessage(data.deleted_message_id);
+        }
+      };
 
-    // En caso de error en la conexión
-    socket.onerror = function(e) {
+      // En caso de error en la conexión
+      socket.onerror = function (e) {
         console.error("Error en WebSocket:", e);
         addSystemMessage("Error al intentar conectar con el servidor.");
-    };
+      };
 
-    // Cuando se cierre la conexión
-    socket.onclose = function(e) {
+      // Cuando se cierre la conexión
+      socket.onclose = function (e) {
         console.log("Conexión cerrada:", e);
         addSystemMessage("Conexión cerrada.");
-    };
+      };
 
-    // Cargar historial de mensajes
-    function loadMessageHistory(messageHistory) {
-        console.log('Cargando historial de mensajes:', messageHistory.length, 'mensajes');
+      // Cargar historial de mensajes
+      function loadMessageHistory(messageHistory) {
+        console.log(
+          "Cargando historial de mensajes:",
+          messageHistory.length,
+          "mensajes"
+        );
 
         if (messageHistory.length > 0) {
-            // Añadir un separador para el inicio del historial
-            const messagesDiv = document.getElementById('messages');
-            const historyDivider = document.createElement('div');
-            historyDivider.className = 'history-divider';
-            const dividerSpan = document.createElement('span');
-            dividerSpan.textContent = 'Historial de mensajes';
-            historyDivider.appendChild(dividerSpan);
-            messagesDiv.appendChild(historyDivider);
+          // Almacenar el ID del usuario actual
+          if (messageHistory[0].user_id) {
+            currentUserId = messageHistory[0].user_id;
+          }
 
-            // Añadir cada mensaje del historial
-            messageHistory.forEach(msg => {
-                addUserMessage(msg.username, msg.message, msg.timestamp);
-            });
+          // Añadir un separador para el inicio del historial
+          const messagesDiv = document.getElementById("messages");
+          const historyDivider = document.createElement("div");
+          historyDivider.className = "history-divider";
+          const dividerSpan = document.createElement("span");
+          dividerSpan.textContent = "Historial de mensajes";
+          historyDivider.appendChild(dividerSpan);
+          messagesDiv.appendChild(historyDivider);
 
-            // Añadir un separador para el final del historial
-            const endHistoryDivider = document.createElement('div');
-            endHistoryDivider.className = 'history-divider';
-            const endDividerSpan = document.createElement('span');
-            endDividerSpan.textContent = 'Nuevos mensajes';
-            endHistoryDivider.appendChild(endDividerSpan);
-            messagesDiv.appendChild(endHistoryDivider);
+          // Añadir cada mensaje del historial
+          messageHistory.forEach((msg) => {
+            addUserMessage(
+              msg.username,
+              msg.message,
+              msg.timestamp,
+              msg.message_id,
+              msg.user_id
+            );
+          });
 
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+          // Añadir un separador para el final del historial
+          const endHistoryDivider = document.createElement("div");
+          endHistoryDivider.className = "history-divider";
+          const endDividerSpan = document.createElement("span");
+          endDividerSpan.textContent = "Nuevos mensajes";
+          endHistoryDivider.appendChild(endDividerSpan);
+          messagesDiv.appendChild(endHistoryDivider);
+
+          messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }
-    }
+      }
 
-    // Agregar un mensaje de sistema al área de mensajes
-    function addSystemMessage(message) {
-        const messagesDiv = document.getElementById('messages');
-        const messageElement = document.createElement('div');
-        messageElement.className = 'system-message';
+      // Agregar un mensaje de sistema al área de mensajes
+      function addSystemMessage(message) {
+        const messagesDiv = document.getElementById("messages");
+        const messageElement = document.createElement("div");
+        messageElement.className = "system-message";
         messageElement.textContent = message;
         messagesDiv.appendChild(messageElement);
         messagesDiv.scrollTop = messagesDiv.scrollHeight; // Desplazar hacia abajo al último mensaje
-    }
+      }
 
-    // Agregar un mensaje de usuario al área de mensajes
-    function addUserMessage(username, message, timestamp) {
-        const messagesDiv = document.getElementById('messages');
+      // Maneja un mensaje eliminado
+      function handleDeletedMessage(messageId) {
+        const messageToRemove = document.querySelector(
+          `.message[data-message-id="${messageId}"]`
+        );
+        if (messageToRemove) {
+          // Opción 1: Eliminar completamente el mensaje
+          // messageToRemove.remove();
 
-        const messageContainer = document.createElement('div');
-        messageContainer.className = 'message';
+          // Opción 2: Mostrar un mensaje indicando que fue eliminado
+          const messageContent =
+            messageToRemove.querySelector(".message-content");
+          messageContent.textContent = "Este mensaje fue eliminado";
+          messageContent.classList.add("deleted-message");
 
-        const messageHeader = document.createElement('div');
-        messageHeader.className = 'message-header';
+          // Eliminar el botón de borrado si existe
+          const deleteButton = messageToRemove.querySelector(".delete-button");
+          if (deleteButton) {
+            deleteButton.remove();
+          }
+        }
+      }
 
-        const usernameSpan = document.createElement('span');
-        usernameSpan.className = 'username';
+      // Agregar un mensaje de usuario al área de mensajes
+      function addUserMessage(username, message, timestamp, messageId, userId) {
+        const messagesDiv = document.getElementById("messages");
+
+        const messageContainer = document.createElement("div");
+        messageContainer.className = "message";
+        if (messageId) {
+          messageContainer.dataset.messageId = messageId;
+        }
+
+        const messageHeader = document.createElement("div");
+        messageHeader.className = "message-header";
+
+        const usernameSpan = document.createElement("span");
+        usernameSpan.className = "username";
         usernameSpan.textContent = username;
 
-        const timestampSpan = document.createElement('span');
-        timestampSpan.className = 'timestamp';
+        const timestampSpan = document.createElement("span");
+        timestampSpan.className = "timestamp";
         timestampSpan.textContent = timestamp;
 
         messageHeader.appendChild(usernameSpan);
         messageHeader.appendChild(timestampSpan);
 
-        const messageContent = document.createElement('div');
-        messageContent.className = 'message-content';
+        // Añadir botón de eliminar en TODOS los mensajes (para pruebas)
+        if (messageId) {
+          const deleteButton = document.createElement("button");
+          deleteButton.className = "delete-button";
+          deleteButton.textContent = "×";
+          deleteButton.title = "Eliminar mensaje";
+          deleteButton.style.display = "inline-block"; // Mostrar siempre el botón
+
+          deleteButton.addEventListener("click", function () {
+            if (confirm("¿Estás seguro que quieres eliminar este mensaje?")) {
+              deleteMessage(messageId);
+            }
+          });
+
+          messageHeader.appendChild(deleteButton);
+        }
+
+        const messageContent = document.createElement("div");
+        messageContent.className = "message-content";
         messageContent.textContent = message;
 
         messageContainer.appendChild(messageHeader);
@@ -218,31 +322,45 @@
 
         messagesDiv.appendChild(messageContainer);
         messagesDiv.scrollTop = messagesDiv.scrollHeight; // Desplazar hacia abajo al último mensaje
-    }
+      }
 
-    // Enviar mensaje al servidor cuando se haga clic en el botón
-    document.getElementById('sendButton').addEventListener('click', function() {
-        const messageInput = document.getElementById('messageInput');
-        const message = messageInput.value.trim();
+      // Función para enviar solicitud de eliminación
+      function deleteMessage(messageId) {
+        // Enviar solicitud al servidor para eliminar el mensaje
+        const deleteData = {
+          action: "delete_message",
+          message_id: messageId,
+        };
+        socket.send(JSON.stringify(deleteData));
+      }
 
-        if (message !== "") {
+      // Enviar mensaje al servidor cuando se haga clic en el botón
+      document
+        .getElementById("sendButton")
+        .addEventListener("click", function () {
+          const messageInput = document.getElementById("messageInput");
+          const message = messageInput.value.trim();
+
+          if (message !== "") {
             // Crear el objeto de mensaje y enviarlo
             const messageData = {
-                message: message
+              message: message,
             };
             socket.send(JSON.stringify(messageData));
             messageInput.value = ""; // Limpiar el campo de entrada
-        } else {
+          } else {
             alert("Por favor, ingresa un mensaje.");
-        }
-    });
+          }
+        });
 
-    // También permitir enviar mensaje con la tecla Enter
-    document.getElementById('messageInput').addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') {
-            document.getElementById('sendButton').click();
-        }
-    });
-</script>
-</body>
+      // También permitir enviar mensaje con la tecla Enter
+      document
+        .getElementById("messageInput")
+        .addEventListener("keydown", function (e) {
+          if (e.key === "Enter") {
+            document.getElementById("sendButton").click();
+          }
+        });
+    </script>
+  </body>
 </html>

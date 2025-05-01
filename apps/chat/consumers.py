@@ -35,22 +35,32 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
-        
+    
         # Comprobar si es una solicitud de eliminación
         if 'action' in text_data_json and text_data_json['action'] == 'delete_message':
             message_id = text_data_json['message_id']
             
-            # Eliminar cualquier mensaje sin verificar propietario (para pruebas)
-            await self.delete_message(message_id)
+            # Verificar si el mensaje existe y si el usuario actual es el propietario
+            message = await self.get_message(message_id)
+            user = self.scope['user']
             
-            # Notificar a todos los clientes sobre la eliminación
-            await self.channel_layer.group_send(
-                self.room_group_name,
-                {
-                    'type': 'message_deleted',
-                    'deleted_message_id': message_id,
-                }
-            )
+            if message and message.sender_id == user.id:
+                # Solo eliminar si el usuario es el propietario
+                await self.delete_message(message_id)
+                
+                # Notificar a todos los clientes sobre la eliminación
+                await self.channel_layer.group_send(
+                    self.room_group_name,
+                    {
+                        'type': 'message_deleted',
+                        'deleted_message_id': message_id,
+                    }
+                )
+            else:
+                # Opcional: notificar al usuario que no puede eliminar este mensaje
+                await self.send(text_data=json.dumps({
+                    'error': 'No puedes eliminar este mensaje porque no eres su autor'
+                }))
             return
         
         # Código existente para manejar mensajes normales
@@ -128,3 +138,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 'message_id': msg.id
             })
         return history
+    
+    @database_sync_to_async
+    def get_message(self, message_id):
+        try:
+            return Message.objects.get(id=message_id)
+        except Message.DoesNotExist:
+            return None

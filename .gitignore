@@ -143,3 +143,4 @@ GitHub.sublime-settings
 #Ignore csv events file
 apps/importer/data/events.csv
 apps/importer/data/.~lock.events.csv#
+.vscode/settings.json

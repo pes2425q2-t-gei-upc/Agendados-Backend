@@ -74,3 +74,13 @@ class EventSummarizedSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
         fields = ["id", "title", "date_ini", "date_end", "categories", "location", "images"]
+
+class ShareLinkSerializer(serializers.ModelSerializer):
+    share_link = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Event
+        fields = ['id', 'title', 'share_link']
+    
+    def get_share_link(self, obj):
+        return f"agendados://event/{obj.id}"

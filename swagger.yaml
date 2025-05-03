@@ -1,7 +1,7 @@
 openapi: 3.0.2
 info:
-  title: ''
-  version: ''
+  title: ""
+  version: ""
 
 servers:
   - url: "http://localhost:8080"
@@ -24,22 +24,22 @@ paths:
   /api/events/:
     get:
       operationId: listget_all_events
-      description: ''
+      description: ""
       parameters: []
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
                 type: array
                 items: {}
-          description: ''
+          description: ""
       tags:
-      - events
+        - events
   /api/events/recommended:
     get:
       operationId: listget_recommended_events
-      description: ''
+      description: ""
       parameters:
         - name: limit
           in: query
@@ -49,124 +49,124 @@ paths:
             type: integer
             example: 50
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
                 type: array
-                items: { }
-          description: ''
+                items: {}
+          description: ""
       tags:
         - events
   /api/events/categories:
     get:
       operationId: listget_all_categories
-      description: ''
+      description: ""
       parameters: []
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
                 type: array
                 items: {}
-          description: ''
+          description: ""
       tags:
-      - events
+        - events
   /api/events/{event_id}:
     get:
       operationId: retrieveget_event_details
-      description: ''
+      description: ""
       parameters:
-      - name: event_id
-        in: path
-        required: true
-        description: ''
-        schema:
-          type: string
+        - name: event_id
+          in: path
+          required: true
+          description: ""
+          schema:
+            type: string
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema: {}
-          description: ''
+          description: ""
       tags:
-      - events
+        - events
   /api/events/favorites:
     get:
       operationId: listget_user_favorites
-      description: ''
+      description: ""
       parameters: []
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
                 type: array
                 items: {}
-          description: ''
+          description: ""
       tags:
-      - events
+        - events
   /api/events/discarded:
     get:
       operationId: listget_user_discardeds
-      description: ''
+      description: ""
       parameters: []
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
                 type: array
                 items: {}
-          description: ''
+          description: ""
       tags:
-      - events
+        - events
   /api/locations/:
     get:
       operationId: listget_all_locations
-      description: ''
+      description: ""
       parameters: []
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
                 type: array
                 items: {}
-          description: ''
+          description: ""
       tags:
-      - locations
+        - locations
   /api/locations/regions:
     get:
       operationId: listget_all_regions
-      description: ''
+      description: ""
       parameters: []
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
                 type: array
                 items: {}
-          description: ''
+          description: ""
       tags:
-      - locations
+        - locations
   /api/locations/towns:
     get:
       operationId: listget_all_towns
-      description: ''
+      description: ""
       parameters: []
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
                 type: array
                 items: {}
-          description: ''
+          description: ""
       tags:
-      - locations
+        - locations
   /api/users/login:
     post:
       operationId: createlogin
@@ -222,7 +222,7 @@ paths:
                     type: string
                     example: "Invalid credentials"
       tags:
-      - users
+        - users
   /api/users/signup:
     post:
       operationId: createsignup
@@ -250,7 +250,7 @@ paths:
                 - email
                 - password
       responses:
-        '201':
+        "201":
           description: "Usuario creado exitosamente y token generado."
           content:
             application/json:
@@ -272,7 +272,7 @@ paths:
                 required:
                   - token
                   - user
-        '400':
+        "400":
           description: "Datos inválidos para crear el usuario."
           content:
             application/json:
@@ -311,7 +311,7 @@ paths:
                 - current_password
                 - new_password
       responses:
-        '200':
+        "200":
           description: "Contraseña actualizada correctamente"
           content:
             application/json:
@@ -321,7 +321,7 @@ paths:
                   message:
                     type: string
                     example: "Contraseña actualizada correctamente"
-        '400':
+        "400":
           description: "Error en la actualización de la contraseña"
           content:
             application/json:
@@ -331,14 +331,14 @@ paths:
                   error:
                     type: string
                     example: "La contraseña actual es incorrecta o la nueva contraseña no cumple los requisitos"
-        '401':
+        "401":
           description: "No autorizado - Token de autenticación inválido o no proporcionado"
       tags:
         - users
   /api/users/test:
     post:
       operationId: createtest
-      description: ''
+      description: ""
       parameters: []
       requestBody:
         content:
@@ -349,24 +349,24 @@ paths:
           multipart/form-data:
             schema: {}
       responses:
-        '201':
+        "201":
           content:
             application/json:
               schema: {}
-          description: ''
+          description: ""
       tags:
-      - users
+        - users
   /api/events/{event_id}/favorites:
     post:
       operationId: createadd_or_remove_favorites
-      description: ''
+      description: ""
       parameters:
-      - name: event_id
-        in: path
-        required: true
-        description: ''
-        schema:
-          type: string
+        - name: event_id
+          in: path
+          required: true
+          description: ""
+          schema:
+            type: string
       requestBody:
         content:
           application/json:
@@ -376,39 +376,39 @@ paths:
           multipart/form-data:
             schema: {}
       responses:
-        '201':
+        "201":
           content:
             application/json:
               schema: {}
-          description: ''
+          description: ""
       tags:
-      - events
+        - events
     delete:
       operationId: destroyadd_or_remove_favorites
-      description: ''
+      description: ""
       parameters:
-      - name: event_id
-        in: path
-        required: true
-        description: ''
-        schema:
-          type: string
+        - name: event_id
+          in: path
+          required: true
+          description: ""
+          schema:
+            type: string
       responses:
-        '204':
-          description: ''
+        "204":
+          description: ""
       tags:
-      - events
+        - events
   /api/events/{event_id}/discarded:
     post:
       operationId: createadd_or_remove_discarded
-      description: ''
+      description: ""
       parameters:
-      - name: event_id
-        in: path
-        required: true
-        description: ''
-        schema:
-          type: string
+        - name: event_id
+          in: path
+          required: true
+          description: ""
+          schema:
+            type: string
       requestBody:
         content:
           application/json:
@@ -418,36 +418,36 @@ paths:
           multipart/form-data:
             schema: {}
       responses:
-        '201':
+        "201":
           content:
             application/json:
               schema: {}
-          description: ''
+          description: ""
       tags:
-      - events
+        - events
     delete:
       operationId: destroyadd_or_remove_discarded
-      description: ''
+      description: ""
       parameters:
-      - name: event_id
-        in: path
-        required: true
-        description: ''
-        schema:
-          type: string
+        - name: event_id
+          in: path
+          required: true
+          description: ""
+          schema:
+            type: string
       responses:
-        '204':
-          description: ''
+        "204":
+          description: ""
       tags:
-      - events
+        - events
 
   /api/users/friendships:
     get:
       operationId: listget_friendships
-      description: 'Obtiene todas las amistades del usuario autenticado'
+      description: "Obtiene todas las amistades del usuario autenticado"
       parameters: []
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
@@ -461,7 +461,7 @@ paths:
                       type: string
                     email:
                       type: string
-          description: 'Lista de amigos del usuario'
+          description: "Lista de amigos del usuario"
       security:
         - TokenAuth: []
       tags:
@@ -470,19 +470,19 @@ paths:
   /api/users/friendships/{user_id}:
     post:
       operationId: send_friend_request
-      description: 'Envía una solicitud de amistad a otro usuario'
+      description: "Envía una solicitud de amistad a otro usuario"
       parameters:
         - name: user_id
           in: path
           required: true
-          description: 'ID del usuario al que se enviará la solicitud'
+          description: "ID del usuario al que se enviará la solicitud"
           schema:
             type: integer
       responses:
-        '201':
-          description: 'Solicitud enviada con éxito o amistad creada automáticamente'
-        '400':
-          description: 'Error al enviar la solicitud (mismo usuario, ya son amigos o solicitud ya existente)'
+        "201":
+          description: "Solicitud enviada con éxito o amistad creada automáticamente"
+        "400":
+          description: "Error al enviar la solicitud (mismo usuario, ya son amigos o solicitud ya existente)"
       security:
         - TokenAuth: []
       tags:
@@ -491,19 +491,19 @@ paths:
   /api/users/friendships/accept/{request_id}:
     post:
       operationId: accept_friend_request
-      description: 'Acepta una solicitud de amistad pendiente'
+      description: "Acepta una solicitud de amistad pendiente"
       parameters:
         - name: request_id
           in: path
           required: true
-          description: 'ID de la solicitud de amistad a aceptar'
+          description: "ID de la solicitud de amistad a aceptar"
           schema:
             type: integer
       responses:
-        '201':
-          description: 'Solicitud aceptada y amistad creada con éxito'
-        '404':
-          description: 'Solicitud no encontrada o no dirigida al usuario actual'
+        "201":
+          description: "Solicitud aceptada y amistad creada con éxito"
+        "404":
+          description: "Solicitud no encontrada o no dirigida al usuario actual"
       security:
         - TokenAuth: []
       tags:
@@ -512,19 +512,19 @@ paths:
   /api/users/friendships/decline/{request_id}:
     delete:
       operationId: decline_friend_request
-      description: 'Rechaza una solicitud de amistad pendiente'
+      description: "Rechaza una solicitud de amistad pendiente"
       parameters:
         - name: request_id
           in: path
           required: true
-          description: 'ID de la solicitud de amistad a rechazar'
+          description: "ID de la solicitud de amistad a rechazar"
           schema:
             type: integer
       responses:
-        '200':
-          description: 'Solicitud rechazada con éxito'
-        '404':
-          description: 'Solicitud no encontrada o no dirigida al usuario actual'
+        "200":
+          description: "Solicitud rechazada con éxito"
+        "404":
+          description: "Solicitud no encontrada o no dirigida al usuario actual"
       security:
         - TokenAuth: []
       tags:
@@ -546,9 +546,9 @@ paths:
           schema:
             type: string
       security:
-        - TokenAuth: [ ]
+        - TokenAuth: []
       responses:
-        '200':
+        "200":
           description: Operación exitosa
           content:
             application/json:
@@ -568,16 +568,16 @@ paths:
                     email:
                       type: string
                       format: email
-        '401':
+        "401":
           description: No autorizado - Token de autenticación inválido o no proporcionado
 
   /api/users/friendships/pending:
     get:
       operationId: get_pending_friend_requests
-      description: 'Obtiene todas las solicitudes de amistad pendientes dirigidas al usuario autenticado'
-      parameters: [ ]
+      description: "Obtiene todas las solicitudes de amistad pendientes dirigidas al usuario autenticado"
+      parameters: []
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
@@ -608,21 +608,21 @@ paths:
                     created_at:
                       type: string
                       format: date-time
-          description: 'Lista de solicitudes de amistad pendientes'
+          description: "Lista de solicitudes de amistad pendientes"
       security:
-        - TokenAuth: [ ]
+        - TokenAuth: []
       tags:
         - users
 
   /api/eventsInArea:
     get:
       operationId: get_events_in_area
-      description: 'Obtiene eventos dentro de un área geográfica especificada por coordenadas'
+      description: "Obtiene eventos dentro de un área geográfica especificada por coordenadas"
       parameters:
         - name: lat_min
           in: query
           required: true
-          description: 'Latitud mínima del área'
+          description: "Latitud mínima del área"
           schema:
             type: number
             format: float
@@ -630,7 +630,7 @@ paths:
         - name: lat_max
           in: query
           required: true
-          description: 'Latitud máxima del área'
+          description: "Latitud máxima del área"
           schema:
             type: number
             format: float
@@ -638,7 +638,7 @@ paths:
         - name: lon_min
           in: query
           required: true
-          description: 'Longitud mínima del área'
+          description: "Longitud mínima del área"
           schema:
             type: number
             format: float
@@ -646,20 +646,20 @@ paths:
         - name: lon_max
           in: query
           required: true
-          description: 'Longitud máxima del área'
+          description: "Longitud máxima del área"
           schema:
             type: number
             format: float
             example: 2.165
       responses:
-        '200':
+        "200":
           content:
             application/json:
               schema:
                 type: array
-                items: { }
-          description: 'Lista de eventos dentro del área especificada'
-        '400':
+                items: {}
+          description: "Lista de eventos dentro del área especificada"
+        "400":
           content:
             application/json:
               schema:
@@ -674,6 +674,49 @@ paths:
                 invalid_format:
                   value:
                     error: "Coordinate parameters must be valid numbers"
-          description: 'Error en los parámetros de la solicitud'
+          description: "Error en los parámetros de la solicitud"
       tags:
         - external-service
+
+  /api/events/{event_id}/share:
+    get:
+      operationId: retrievegenerate_share_link
+      description: "Genera un enlace compartible para un evento específico"
+      parameters:
+        - name: event_id
+          in: path
+          required: true
+          description: "ID del evento para el cual se generará el enlace"
+          schema:
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 123
+                  title:
+                    type: string
+                    example: "Festival de Música"
+                  share_link:
+                    type: string
+                    example: "agendados://event/123"
+          description: "Enlace compartible generado exitosamente"
+        "404":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Evento no encontrado"
+          description: "Evento no encontrado"
+      security:
+        - TokenAuth: []
+      tags:
+        - events

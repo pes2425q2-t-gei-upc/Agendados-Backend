@@ -21,7 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "dev-secret-key-for-testing")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(os.environ.get("DEBUG", default=0))
@@ -45,7 +45,10 @@ INSTALLED_APPS = [
     "apps.events",
     "apps.locations",
     "apps.importer",
+    "apps.chat",
+    "channels",
     "corsheaders",
+    "storages",
 ]
 
 MIDDLEWARE = [
@@ -81,6 +84,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "agendadosDjango.wsgi.application"
 
+ASGI_APPLICATION = 'agendadosDjango.asgi.application'
+
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
@@ -90,9 +95,9 @@ DATABASES = {
         "ENGINE": "django.db.backends.{}".format(
             os.getenv("DATABASE_ENGINE", "sqlite3")
         ),
-        "NAME": os.getenv("DATABASE_NAME", "polls"),
-        "USER": os.getenv("DATABASE_USERNAME", "myprojectuser"),
-        "PASSWORD": os.getenv("DATABASE_PASSWORD", "password"),
+        "NAME": os.getenv("DATABASE_NAME", "postgres"),
+        "USER": os.getenv("DATABASE_USERNAME", "postgres"),
+        "PASSWORD": os.getenv("DATABASE_PASSWORD", "postgres"),
         "HOST": os.getenv("DATABASE_HOST", "127.0.0.1"),
         "PORT": os.getenv("DATABASE_PORT", 5432),
     }
@@ -122,7 +127,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = 'Europe/Madrid'
 
 USE_I18N = True
 
@@ -150,4 +155,22 @@ SWAGGER_SETTINGS = {
         }
     },
     'USE_SESSION_AUTH': False,
+}
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+    }
+}
+
+# AWS S3 settings
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = 'agendados-bucket'
+AWS_S3_REGION_NAME = 'eu-central-1'
+AWS_S3_FILE_OVERWRITE = False
+AWS_DEFAULT_ACL = 'public-read'
+AWS_S3_OBJECT_PARAMETERS = {
+    'CacheControl': 'max-age=86400',
 }

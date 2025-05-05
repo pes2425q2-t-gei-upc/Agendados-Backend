@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-
+from apps.users.models import FriendRequest
 
 class UserSerializer(serializers.ModelSerializer):
     language = serializers.SerializerMethodField()
@@ -14,3 +14,11 @@ class UserSerializer(serializers.ModelSerializer):
         if profile:
             return profile.language
         return None
+
+class FriendRequestSerializer(serializers.ModelSerializer):
+    user_from = UserSerializer(read_only=True)
+    user_to = UserSerializer(read_only=True)
+
+    class Meta:
+        model = FriendRequest
+        fields = ['id', 'user_from', 'user_to', 'created_at']

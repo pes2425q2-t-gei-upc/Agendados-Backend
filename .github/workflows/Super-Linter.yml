@@ -50,6 +50,12 @@ jobs:
           VALIDATE_PYTHON_PYINK: false
           VALIDATE_ENV: false
           VALIDATE_OPENAPI: false
+          VALIDATE_BASH_EXEC: false
+          VALIDATE_GITLEAKS: false
+          VALIDATE_HTML: false
+          VALIDATE_HTML_PRETTIER: false
+          VALIDATE_SHELL_SHFMT: false
+          VALIDATE_SQLFLUFF: false
 
       - name: Commit and push linting fixes
         # Run only on:

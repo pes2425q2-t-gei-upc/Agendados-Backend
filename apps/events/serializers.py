@@ -23,10 +23,9 @@ class EventImageSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        images_domain = os.environ.get("IMAGES_DOMAIN")
 
         if instance.image_url:
-            representation["image_url"] = f"{images_domain}{instance.image_url}"
+            representation["image_url"] = instance.image_url
         return representation
 
 

@@ -25,5 +25,5 @@ urlpatterns = [
     path("api/events/", include("apps.events.urls")),
     path("api/locations/", include("apps.locations.urls")),
     path("api/eventsInArea", external_service_views.get_events_in_area, name="get_events_in_area"),
-
+    path("api/chat/", include("apps.chat.urls")),
 ]

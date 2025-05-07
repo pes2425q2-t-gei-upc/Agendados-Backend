@@ -720,3 +720,26 @@ paths:
         - TokenAuth: []
       tags:
         - events
+
+  /api/chat/events_where_user_messaged:
+    get:
+      operationId: get_events_by_user_has_messaged
+      description: Retorna una lista de eventos en los cuales el usuario autenticado ha participado enviando al menos un mensaje.
+      tags:
+        - chats
+      security:
+        - TokenAuth: [ ]
+      responses:
+        '200':
+          description: Lista de eventos recuperada exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { }
+        '401':
+          description: No autorizado - Token de autenticación inválido o ausente
+        '403':
+          description: Prohibido - El usuario no tiene permiso para acceder a estos datos
+        '500':
+          description: Error interno del servidor

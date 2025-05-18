@@ -1,5 +1,5 @@
 from django.urls import path
-from apps.users.views import auth_views, friendship_views, user_views
+from apps.users.views import auth_views, friendship_views, user_views, forgot_password_views
 
 urlpatterns = [
     #Auth urls
@@ -7,6 +7,8 @@ urlpatterns = [
     path("signup", auth_views.signup, name="signup"),
     path("test", auth_views.test, name="test"),
     path("update-password", user_views.update_password, name="update_password"),
+    path("forgot-password", forgot_password_views.forgot_password, name="forgot_password"),
+    path('reset-password/<uidb64>/<token>/', forgot_password_views.forgot_password, name='reset-password'),
     #Friendship urls
     path("friendships", friendship_views.get_friendships, name="friendships"),
     path("friendships/<int:user_id>", friendship_views.send_friend_request, name="send_friend_request"),

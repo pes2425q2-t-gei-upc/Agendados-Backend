@@ -335,6 +335,46 @@ paths:
           description: "No autorizado - Token de autenticación inválido o no proporcionado"
       tags:
         - users
+  /api/users/forgot-password:
+    post:
+      operationId: create_forgot_password
+      description: "Envía un correo electrónico con un enlace para restablecer la contraseña del usuario"
+      tags:
+        - users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "johndoe@example.com"
+              required:
+                - email
+      responses:
+        "200":
+          description: "Correo enviado si el email está registrado. Siempre devuelve 200 por seguridad"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: "Si el correo existe, enviamos instrucciones para restablecer la contraseña."
+        "400":
+          description: "Falta el campo de correo electrónico"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: "El campo email es obligatorio."
   /api/users/test:
     post:
       operationId: createtest

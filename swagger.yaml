@@ -768,18 +768,63 @@ paths:
       tags:
         - chats
       security:
-        - TokenAuth: [ ]
+        - TokenAuth: []
       responses:
-        '200':
+        "200":
           description: Lista de eventos recuperada exitosamente
           content:
             application/json:
               schema:
                 type: array
-                items: { }
-        '401':
+                items: {}
+        "401":
           description: No autorizado - Token de autenticación inválido o ausente
-        '403':
+        "403":
           description: Prohibido - El usuario no tiene permiso para acceder a estos datos
-        '500':
+        "500":
           description: Error interno del servidor
+
+  /api/auth/google:
+    post:
+      operationId: google_auth
+      description: "Autenticar usuario con Google y retornar token de API"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                idToken:
+                  type: string
+                  description: "ID Token obtenido de Google OAuth"
+              required:
+                - idToken
+      responses:
+        "200":
+          description: "Autenticación exitosa"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    example: "abc123token"
+                  user:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      username:
+                        type: string
+                      email:
+                        type: string
+        "400":
+          description: "Token no proporcionado"
+        "401":
+          description: "Token inválido"
+        "500":
+          description: "Error de servidor"
+      tags:
+        - users

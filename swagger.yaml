@@ -784,7 +784,7 @@ paths:
         "500":
           description: Error interno del servidor
 
-  /api/auth/google:
+  /api/users/auth/google/:
     post:
       operationId: google_auth
       description: "Autenticar usuario con Google y retornar token de API"

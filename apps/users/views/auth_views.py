@@ -15,6 +15,8 @@ from rest_framework import status
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
 from django.conf import settings
+from google.oauth2 import id_token
+from google.auth.transport import requests
 
 
 @api_view(["POST"])
@@ -68,12 +70,36 @@ def google_auth(request):
         )
 
     try:
-        # Verificar el ID token con los servidores de Google
-        idinfo = id_token.verify_oauth2_token(
-            id_token_str, 
-            requests.Request(), 
-            settings.GOOGLE_CLIENT_ID
-        )
+        # Lista de Client IDs aceptados
+        client_ids = [
+            settings.GOOGLE_CLIENT_ID,  # Tu Client ID actual
+            settings.GOOGLE_CLIENT_ID_ALCO
+        ]
+        
+        # Intentar verificar con cada client_id
+        idinfo = None
+        last_error = None
+        
+        for client_id in client_ids:
+            try:
+                # Verificar el ID token con los servidores de Google
+                idinfo = id_token.verify_oauth2_token(
+                    id_token_str, 
+                    requests.Request(), 
+                    client_id
+                )
+                # Si llegamos aquí, la verificación fue exitosa
+                break
+            except ValueError as e:
+                last_error = e
+                continue
+                
+        # Si ningún Client ID funcionó
+        if not idinfo:
+            return Response(
+                {"error": f"Token de Google inválido o expirado: {str(last_error)}"}, 
+                status=status.HTTP_401_UNAUTHORIZED
+            )
         
         # Verificar que el token es de Google
         if idinfo['iss'] not in ['accounts.google.com', 'https://accounts.google.com']:

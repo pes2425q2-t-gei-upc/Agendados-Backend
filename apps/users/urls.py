@@ -1,5 +1,6 @@
 from django.urls import path
 from apps.users.views import auth_views, friendship_views, user_views, forgot_password_views
+from .views.auth_views import google_auth
 
 urlpatterns = [
     #Auth urls
@@ -16,4 +17,5 @@ urlpatterns = [
     path("friendships/decline/<int:request_id>", friendship_views.decline_friend_request, name="decline_friend_request"),
     path("all", user_views.get_users, name="get_users"),
     path("friendships/pending", friendship_views.get_pending_friend_requests, name="get_pending_friend_requests"),
+    path('auth/google/', google_auth, name='google-auth'),
 ]

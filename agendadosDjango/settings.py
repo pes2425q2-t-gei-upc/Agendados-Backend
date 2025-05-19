@@ -199,3 +199,4 @@ AWS_S3_OBJECT_PARAMETERS = {
 
 # Google OAuth Settings
 GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID')
+GOOGLE_CLIENT_ID_ALCO = os.environ.get('GOOGLE_CLIENT_ID_ALCO')

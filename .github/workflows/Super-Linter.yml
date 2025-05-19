@@ -3,9 +3,9 @@ name: Lint
 
 on:
   push:
-   branches: [ "develop" ]
+    branches: ["develop"]
   pull_request:
-   branches: [ "develop" ]
+    branches: ["develop"]
 
 permissions: {}
 
@@ -44,6 +44,7 @@ jobs:
           VALIDATE_JSCPD: false
           VALIDATE_PYTHON_FLAKE8: false
           VALIDATE_PYTHON_MYPY: false
+          VALIDATE_PYTHON_RUFF: false
           VALIDATE_MARKDOWN: false
           VALIDATE_MARKDOWN_PRETTIER: false
           VALIDATE_PYTHON_PYLINT: false

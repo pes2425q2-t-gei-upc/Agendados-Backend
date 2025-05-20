@@ -1,17 +1,20 @@
 import requests
 import re
-from datetime import datetime, timedelta
-from uuid import uuid4
+from datetime import datetime
+import json
+from icalendar import Calendar
 
 from agendadosDjango.settings import GEMINI_API_KEY
 
 
-def generate_event_ics(description):
+def generate_event_ics(description, start_date=None, end_date=None):
     """
     Genera un archivo ICS completo basado en una descripción de horario usando Gemini.
 
     Args:
         description (str): Descripción del horario
+        start_date (str, optional): Fecha de inicio en formato 'YYYY-MM-DD'
+        end_date (str, optional): Fecha de fin en formato 'YYYY-MM-DD'
         api_key (str): API key de Google Gemini (opcional)
 
     Returns:
@@ -21,6 +24,11 @@ def generate_event_ics(description):
     api_key = GEMINI_API_KEY
     url = f'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={api_key}'
 
+    # Formatear fechas para el prompt
+    current_date = datetime.now().strftime('%Y%m%d')
+    start_date_info = f"Fecha de inicio: {start_date}" if start_date else f"Usa fecha actual como referencia: {current_date}"
+    end_date_info = f"Fecha de fin: {end_date}" if end_date else ""
+
     # Crear el prompt para generar ICS
     prompt = f"""Analiza esta descripción de horario: "{description}"
 
@@ -28,7 +36,8 @@ Instrucciones:
 - Genera un archivo .ics COMPLETO y válido que represente este horario
 - Incluye TODOS los componentes necesarios: VCALENDAR, VEVENT, VTIMEZONE si es necesario
 - Usa RRULE cuando sea apropiado para horarios recurrentes
-- Establece DTSTART apropiado (usa fecha actual como referencia: {datetime.now().strftime('%Y%m%d')})
+- {start_date_info}
+- {end_date_info}
 - Incluye DTEND para cada evento
 - Añade un SUMMARY descriptivo basado en la descripción
 - Usa formato de fecha/hora correcto (YYYYMMDDTHHMMSS)
@@ -101,21 +110,13 @@ END:VCALENDAR"""
         if not raw_content:
             raise Exception("No se pudo obtener respuesta de Gemini")
 
-        # Limpiar y validar contenido ICS
         ics_content = clean_ics_content(raw_content)
-
-        # Validar que el contenido sea válido
-        if not validate_ics_content(ics_content):
-            # Si no es válido, intentar generar uno básico
-            ics_content = generate_fallback_ics(description)
 
         return ics_content
 
     except Exception as e:
         print(f"Error al generar ICS con Gemini: {e}")
         # Generar ICS básico como fallback
-        return generate_fallback_ics(description)
-
 
 def clean_ics_content(raw_content):
     """
@@ -150,15 +151,6 @@ def clean_ics_content(raw_content):
 
 
 def validate_ics_content(content):
-    """
-    Valida que el contenido ICS tenga la estructura básica correcta.
-
-    Args:
-        content (str): Contenido ICS a validar
-
-    Returns:
-        bool: True si es válido, False en caso contrario
-    """
     required_elements = [
         'BEGIN:VCALENDAR',
         'END:VCALENDAR',
@@ -170,97 +162,20 @@ def validate_ics_content(content):
 
     return all(element in content for element in required_elements)
 
+def parse_ics_string_to_json(ics_string):
+    cal = Calendar.from_ical(ics_string.encode("utf-8"))
 
-def generate_fallback_ics(description):
-    """
-    Genera un archivo ICS básico como fallback cuando Gemini falla.
+    events = []
+    for component in cal.walk():
+        if component.name == "VEVENT":
+            event = {
+                "summary": str(component.get("summary")),
+                "description": str(component.get("description", "")),
+                "location": str(component.get("location", "")),
+                "start": component.get("dtstart").dt.isoformat() if isinstance(component.get("dtstart").dt, datetime) else str(component.get("dtstart").dt),
+                "end": component.get("dtend").dt.isoformat() if isinstance(component.get("dtend").dt, datetime) else str(component.get("dtend").dt),
+                "uid": str(component.get("uid")),
+            }
+            events.append(event)
 
-    Args:
-        description (str): Descripción del horario
-
-    Returns:
-        str: Contenido ICS básico
-    """
-    now = datetime.now()
-    uid = str(uuid4())
-    dtstamp = now.strftime('%Y%m%dT%H%M%SZ')
-
-    # ICS básico con evento semanal
-    ics_content = f"""BEGIN:VCALENDAR
-VERSION:2.0
-PRODID:-//Generador Horarios//NONSGML v1.0//ES
-CALSCALE:GREGORIAN
-BEGIN:VTIMEZONE
-TZID:Europe/Madrid
-BEGIN:DAYLIGHT
-TZOFFSETFROM:+0100
-TZOFFSETTO:+0200
-TZNAME:CEST
-DTSTART:19700329T020000
-RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU
-END:DAYLIGHT
-BEGIN:STANDARD
-TZOFFSETFROM:+0200
-TZOFFSETTO:+0100
-TZNAME:CET
-DTSTART:19701025T030000
-RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU
-END:STANDARD
-END:VTIMEZONE
-BEGIN:VEVENT
-DTSTART;TZID=Europe/Madrid:{now.strftime('%Y%m%d')}T090000
-DTEND;TZID=Europe/Madrid:{now.strftime('%Y%m%d')}T170000
-RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR
-SUMMARY:Horario: {description[:50]}...
-DESCRIPTION:{description}
-UID:{uid}@generador-horarios.com
-DTSTAMP:{dtstamp}
-END:VEVENT
-END:VCALENDAR"""
-
-    return ics_content
-
-
-def save_ics_file(ics_content, description, filename=None):
-    """
-    Guarda el contenido ICS en un archivo.
-
-    Args:
-        ics_content (str): Contenido del archivo ICS
-        description (str): Descripción del horario
-        filename (str): Nombre del archivo (opcional)
-
-    Returns:
-        str: Nombre del archivo guardado
-    """
-    if filename is None:
-        # Generar nombre único
-        date_str = datetime.now().strftime('%Y%m%d_%H%M')
-        clean_desc = re.sub(r'[^a-zA-Z0-9]', '_', description[:20])
-        filename = f"horario_{date_str}_{clean_desc}.ics"
-
-    try:
-        with open(filename, 'w', encoding='utf-8') as f:
-            f.write(ics_content)
-        print(f"✅ Archivo guardado como: {filename}")
-        return filename
-    except Exception as e:
-        print(f"❌ Error al guardar archivo: {e}")
-        return None
-
-
-# Ejemplo de uso
-if __name__ == "__main__":
-    # Descripción de ejemplo
-    descripcion_ejemplo = "De dilluns a divendres: de 10 a 14 h i de 17 a 20 h Dissabtes: d'11 a 14 h i de 17 a 20 h Diumenges i altres festius: d'11 a 14 h"
-
-    # Generar archivo ICS
-    print("Generando archivo ICS...")
-    contenido_ics = generate_event_ics(descripcion_ejemplo)
-
-    # Guardar archivo
-    nombre_archivo = save_ics_file(contenido_ics, descripcion_ejemplo)
-
-    # Mostrar contenido
-    print("\n--- CONTENIDO ICS GENERADO ---")
-    print(contenido_ics)
+    return json.dumps(events, indent=4, ensure_ascii=False)

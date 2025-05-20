@@ -28,6 +28,7 @@ DEBUG = bool(os.environ.get("DEBUG", default=0))
 
 ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "127.0.0.1").split(",")
 
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', 'your_gemini_api_key')
 
 # Application definition
 

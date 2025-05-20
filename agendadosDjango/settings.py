@@ -50,6 +50,7 @@ EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'False') == 'True'
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'webmaster@localhost')
 EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
 
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', 'your_gemini_api_key')
 
 # Application definition
 

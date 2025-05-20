@@ -21,12 +21,34 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "dev-secret-key-for-testing")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(os.environ.get("DEBUG", default=0))
 
-ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "127.0.0.1").split(",")
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    'agendados-backend-842309366027.europe-southwest1.run.app',
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://agendados-backend-842309366027.europe-southwest1.run.app',
+]
+
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SAMESITE = 'Lax'
+
+#Email settings
+EMAIL_HOST = os.getenv('EMAIL_HOST', 'localhost')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', 25))
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'False') == 'True'
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'webmaster@localhost')
+EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
 
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', 'your_gemini_api_key')
 
@@ -46,7 +68,10 @@ INSTALLED_APPS = [
     "apps.events",
     "apps.locations",
     "apps.importer",
+    "apps.chat",
+    "channels",
     "corsheaders",
+    "storages",
 ]
 
 MIDDLEWARE = [
@@ -82,6 +107,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "agendadosDjango.wsgi.application"
 
+ASGI_APPLICATION = 'agendadosDjango.asgi.application'
+
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
@@ -91,9 +118,9 @@ DATABASES = {
         "ENGINE": "django.db.backends.{}".format(
             os.getenv("DATABASE_ENGINE", "sqlite3")
         ),
-        "NAME": os.getenv("DATABASE_NAME", "polls"),
-        "USER": os.getenv("DATABASE_USERNAME", "myprojectuser"),
-        "PASSWORD": os.getenv("DATABASE_PASSWORD", "password"),
+        "NAME": os.getenv("DATABASE_NAME", "postgres"),
+        "USER": os.getenv("DATABASE_USERNAME", "postgres"),
+        "PASSWORD": os.getenv("DATABASE_PASSWORD", "postgres"),
         "HOST": os.getenv("DATABASE_HOST", "127.0.0.1"),
         "PORT": os.getenv("DATABASE_PORT", 5432),
     }
@@ -123,7 +150,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = 'Europe/Madrid'
 
 USE_I18N = True
 
@@ -152,3 +179,25 @@ SWAGGER_SETTINGS = {
     },
     'USE_SESSION_AUTH': False,
 }
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+    }
+}
+
+# AWS S3 settings
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = 'agendados-bucket'
+AWS_S3_REGION_NAME = 'eu-central-1'
+AWS_S3_FILE_OVERWRITE = False
+AWS_DEFAULT_ACL = 'public-read'
+AWS_S3_OBJECT_PARAMETERS = {
+    'CacheControl': 'max-age=86400',
+}
+
+# Google OAuth Settings
+GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID')
+GOOGLE_CLIENT_ID_ALCO = os.environ.get('GOOGLE_CLIENT_ID_ALCO')

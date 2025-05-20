@@ -2,7 +2,7 @@ from django.conf import settings
 from rest_framework import serializers
 from .models import Event, Category, Scope, EventImage, EventLink, UserEvent
 from ..locations.serializers import LocationSerializer
-
+import os
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -23,10 +23,9 @@ class EventImageSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        images_domain = "https://agenda.cultura.gencat.cat"
 
         if instance.image_url:
-            representation["image_url"] = f"{images_domain}{instance.image_url}"
+            representation["image_url"] = instance.image_url
         return representation
 
 
@@ -74,3 +73,13 @@ class EventSummarizedSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
         fields = ["id", "title", "date_ini", "date_end", "categories", "location", "images"]
+
+class ShareLinkSerializer(serializers.ModelSerializer):
+    share_link = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Event
+        fields = ['id', 'title', 'share_link']
+    
+    def get_share_link(self, obj):
+        return f"agendados://event/{obj.id}"

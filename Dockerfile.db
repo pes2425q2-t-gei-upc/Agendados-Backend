@@ -1,0 +1,13 @@
+# Dockerfile.db
+FROM postgres:17
+
+# Instala pglogical
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    postgresql-17-pglogical \
+    && rm -rf /var/lib/apt/lists/*
+
+# --- Añadido: Modificar pg_hba.conf ---
+# Reemplaza 'dms_user' por tu usuario de DMS y 'md5' si usas scram-sha-256
+# Asegúrate que la ruta /var/lib/postgresql/data/pg_hba.conf es correcta (verifícala con SHOW hba_file;)
+RUN echo "host    all             dbuser        34.175.46.133/32        scram-sha-256" >> /var/lib/postgresql/data/pg_hba.conf
+

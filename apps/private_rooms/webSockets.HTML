@@ -22,11 +22,8 @@
                 alert("Please enter a room code.");
                 return;
             }
-            // Replace with your backend hostname if not running on localhost
-            const wsProtocol = window.location.protocol === "https:" ? "wss" : "ws";
-            const wsUrl = `${wsProtocol}://${window.location.host}/ws/room/${roomCode}/`;
-            console.log("WebSocket URL:", wsUrl);
-            socket = new WebSocket(wsUrl);
+            const token = "cef830d7430981641e14f16126d028a28b3fb1de";
+            const socket = new WebSocket(`ws://localhost:8080/ws/room/HWFZ8/?token=${token}`);
 
             socket.onopen = function () {
                 console.log("WebSocket connection opened.");

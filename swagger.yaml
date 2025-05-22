@@ -828,3 +828,47 @@ paths:
           description: "Error de servidor"
       tags:
         - users
+
+  /api/private_rooms/:
+    post:
+      summary: Crear una sala privada
+      description: Crea una sala privada con un código generado automáticamente. Requiere autenticación con token.
+      operationId: createPrivateRoom
+      tags:
+        - Salas Privadas
+      security:
+        - TokenAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  example: Sala de Reunión
+      responses:
+        '201':
+          description: Sala privada creada exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  code:
+                    type: string
+                    example: "A1B2C"
+                  name:
+                    type: string
+                    example: Sala de Reunión
+                  admin:
+                    type: integer
+                    example: 4
+        '401':
+          description: No autorizado. Token de autenticación requerido.

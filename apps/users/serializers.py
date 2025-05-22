@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from apps.users.models import FriendRequest
+from apps.users.models import FriendRequest, UserFCMToken, Notification
 
 class UserSerializer(serializers.ModelSerializer):
     language = serializers.SerializerMethodField()
@@ -22,3 +22,15 @@ class FriendRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = FriendRequest
         fields = ['id', 'user_from', 'user_to', 'created_at']
+
+
+# --- Agregados para notificaciones ---
+class UserFCMTokenSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserFCMToken
+        fields = ['id', 'user', 'token', 'created_at', 'updated_at']
+
+class NotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notification
+        fields = ['id', 'user', 'title', 'body', 'is_read', 'created_at']

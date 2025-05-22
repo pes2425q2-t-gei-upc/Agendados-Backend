@@ -201,3 +201,7 @@ AWS_S3_OBJECT_PARAMETERS = {
 # Google OAuth Settings
 GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID')
 GOOGLE_CLIENT_ID_ALCO = os.environ.get('GOOGLE_CLIENT_ID_ALCO')
+
+# Firebase Cloud Messaging (V1)
+FCM_SERVICE_ACCOUNT_FILE = os.path.join(BASE_DIR, 'jovial-engine-456715-j1-949cb1d80dd6.json')
+FCM_PROJECT_ID = 'jovial-engine-456715-j1'

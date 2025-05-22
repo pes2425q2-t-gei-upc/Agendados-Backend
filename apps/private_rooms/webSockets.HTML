@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Private Room WebSocket Test</title>
+</head>
+<body>
+    <h1>WebSocket Test for Private Room</h1>
+    <input type="text" id="roomCode" placeholder="Enter room code (e.g., 12345)">
+    <button onclick="connectWebSocket()">Connect</button>
+    <br><br>
+    <input type="text" id="messageInput" placeholder="Type a message...">
+    <button onclick="sendMessage()">Send</button>
+
+    <script>
+        let socket;
+
+        function connectWebSocket() {
+            const roomCode = document.getElementById("roomCode").value;
+            console.log("Connecting to room code:", roomCode);
+            if (!roomCode) {
+                alert("Please enter a room code.");
+                return;
+            }
+            // Replace with your backend hostname if not running on localhost
+            const wsProtocol = window.location.protocol === "https:" ? "wss" : "ws";
+            const wsUrl = `${wsProtocol}://${window.location.host}/ws/room/${roomCode}/`;
+            console.log("WebSocket URL:", wsUrl);
+            socket = new WebSocket(wsUrl);
+
+            socket.onopen = function () {
+                console.log("WebSocket connection opened.");
+            };
+
+            socket.onmessage = function (event) {
+                console.log("Message received:", event.data);
+            };
+
+            socket.onclose = function () {
+                console.log("WebSocket connection closed.");
+            };
+
+            socket.onerror = function (error) {
+                console.error("WebSocket error:", error);
+            };
+        }
+
+        function sendMessage() {
+            const message = document.getElementById("messageInput").value;
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                socket.send(message);
+            } else {
+                alert("WebSocket is not connected.");
+            }
+        }
+    </script>
+</body>
+</html>

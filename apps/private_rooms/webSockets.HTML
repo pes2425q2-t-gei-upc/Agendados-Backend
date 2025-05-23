@@ -203,7 +203,6 @@
     <div class="container">
         <h3>Connection</h3>
         <div id="connectionStatus" class="connection-status disconnected">Disconnected</div>
-
         <input type="text" id="roomCode" placeholder="Enter room code (e.g., HWFZ8)" value="HWFZ8">
         <button id="connectBtn" onclick="connectWebSocket()">Connect</button>
         <button id="disconnectBtn" onclick="disconnectWebSocket()" disabled>Disconnect</button>
@@ -215,6 +214,13 @@
                 <h3>Messages</h3>
                 <div id="messageArea"></div>
                 <button id="startRoomBtn" onclick="startRoom()" disabled>Start Room</button>
+                <div id="votingArea" style="display:none; margin-top: 20px;">
+                    <h4>📊 Vote on Event</h4>
+                    <p id="eventTitle" style="font-weight: bold;"></p>
+                    <button onclick="castVote(true)">👍 Yes</button>
+                    <button onclick="castVote(false)">👎 No</button>
+                    <div id="voteResults" style="margin-top:10px; font-style: italic;"></div>
+                </div>
             </div>
         </div>
 
@@ -255,8 +261,8 @@
                 startRoomBtn.disabled = true;
                 isConnected = false;
 
-                // Clear participants when disconnected
                 updateParticipantsList([]);
+                document.getElementById('votingArea').style.display = 'none';
             }
         }
 
@@ -264,7 +270,6 @@
             currentParticipants = participants;
             const participantsList = document.getElementById('participantsList');
             const participantsCount = document.getElementById('participantsCount');
-
             participantsList.innerHTML = '';
 
             if (participants.length === 0) {
@@ -308,51 +313,51 @@
 
         function connectWebSocket() {
             const roomCode = document.getElementById("roomCode").value;
-            console.log("Connecting to room code:", roomCode);
-
-            if (!roomCode) {
-                alert("Please enter a room code.");
-                return;
-            }
+            if (!roomCode) return alert("Please enter a room code.");
 
             const token = "cef830d7430981641e14f16126d028a28b3fb1de";
             socket = new WebSocket(`ws://localhost:8080/ws/room/${roomCode}/?token=${token}`);
 
-            socket.onopen = function () {
-                console.log("WebSocket connection opened.");
+            socket.onopen = () => {
                 updateConnectionStatus('connected', `Room: ${roomCode}`);
                 addMessage(`Connected to room: ${roomCode}`, 'system-message');
             };
 
-            socket.onmessage = function (event) {
-                console.log("Message received:", event.data);
-
+            socket.onmessage = (event) => {
                 try {
                     const data = JSON.parse(event.data);
-
                     switch(data.type) {
                         case 'user_joined':
-                            // Update participants list
                             updateParticipantsList(data.participants);
-
-                            // Show join notification
                             addMessage(`🟢 ${data.user_joined.username} joined the room`, 'user-joined');
                             break;
-
                         case 'user_left':
-                            // Update participants list
                             updateParticipantsList(data.participants);
-
-                            // Show leave notification
                             addMessage(`🔴 ${data.user_left.username} left the room`, 'user-left');
                             break;
-
                         case 'room_started':
                             addMessage('🚀 The room has started!', 'room-started');
                             addMessage(`📊 Vote on this event: ${data.event.title}`, 'system-message');
+                            showVotingArea(data.event.title);
                             break;
-
+                        case 'vote_cast':
+                            const result = data.vote_results;
+                            const voter = data.user.username;
+                            addMessage(`🗳️ ${voter} voted ${data.vote ? 'YES' : 'NO'}`, 'chat-message');
+                            updateVoteResults(result);
+                            break;
+                        case 'vote_finished':
+                            if (data.is_match) {
+                                addMessage(`🎉 The final event is: ${data.current_event.title}`, 'system-message');
+                                document.getElementById('votingArea').style.display = 'none';
+                            } else {
+                                addMessage(`➡️ Next round! Vote on this event: ${data.next_event.title}`, 'system-message');
+                                showVotingArea(data.next_event.title);
+                                updateVoteResults({ true_votes: 0, false_votes: 0, total_votes: 0 });
+                            }
+                            break;
                         default:
+                            console.log(data.type)
                             addMessage(`📝 ${JSON.stringify(data)}`, 'system-message');
                     }
                 } catch (e) {
@@ -360,15 +365,15 @@
                 }
             };
 
-            socket.onclose = function (event) {
-                console.log("WebSocket connection closed.", event);
+
+            socket.onclose = (event) => {
                 updateConnectionStatus('disconnected', `Code: ${event.code}`);
                 addMessage(`Connection closed (Code: ${event.code})`, 'system-message');
             };
 
-            socket.onerror = function (error) {
+            socket.onerror = (error) => {
                 console.error("WebSocket error:", error);
-                addMessage(`❌ Connection error: ${error}`, 'system-message');
+                addMessage(`❌ Connection error`, 'system-message');
             };
         }
 
@@ -381,17 +386,29 @@
 
         function startRoom() {
             if (socket && socket.readyState === WebSocket.OPEN) {
-                const messageData = JSON.stringify({
-                    action: "start_room"
-                });
-                socket.send(messageData);
+                socket.send(JSON.stringify({ action: "start_room" }));
             } else {
                 alert("WebSocket is not connected.");
             }
         }
 
-        function clearMessages() {
-            document.getElementById('messageArea').innerHTML = '';
+        function castVote(voteValue) {
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify({
+                    action: "vote",
+                    vote: voteValue
+                }));
+            }
+        }
+
+        function showVotingArea(title) {
+            document.getElementById("eventTitle").textContent = title;
+            document.getElementById("votingArea").style.display = 'block';
+        }
+
+        function updateVoteResults(results) {
+            document.getElementById("voteResults").textContent =
+                `✅ Yes: ${results.true_votes}, ❌ No: ${results.false_votes}, Total: ${results.total_votes}`;
         }
 
         document.getElementById('roomCode').addEventListener('keypress', function(e) {

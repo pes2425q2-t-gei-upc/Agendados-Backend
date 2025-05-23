@@ -115,6 +115,8 @@ class PrivateRoomConsumer(AsyncWebsocketConsumer):
 
         if action == 'start_room':
             await self.start_room()
+        if action == 'vote':
+            await self.handle_vote(data)
 
     async def start_room(self):
         user = self.scope['user']
@@ -129,12 +131,16 @@ class PrivateRoomConsumer(AsyncWebsocketConsumer):
         events = await sync_to_async(lambda: list(Event.objects.order_by('-id')[:50]))()
         events_serialized = await serialize_event(events, True)
         # Create PrivateRoomEvent instances for each event
+        await sync_to_async(PrivateRoomEvent.objects.filter(private_room=room).delete)()
         for index, event in enumerate(events):
-            await sync_to_async(PrivateRoomEvent.objects.create)(
+            event_instance, _ = await sync_to_async(PrivateRoomEvent.objects.get_or_create)(
                 private_room=room,
-                event=event,
-                is_current=(index == 0)
+                event=event
             )
+            if index == 0:
+                event_instance.is_current = True
+                await sync_to_async(event_instance.save)()
+
         await self.channel_layer.group_send(
             self.room_group_name,
             {
@@ -171,12 +177,54 @@ class PrivateRoomConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_send(
             self.room_group_name,
             {
-                'type': 'vote_casted',
+                'type': 'vote_cast',
                 'user': serialized_user,
                 'vote': vote_value,
                 'vote_results': vote_results,
             }
         )
+
+        # Check if all users have voted, and if it is a match
+        participants = await sync_to_async(list)(
+            room.participants.all().values_list('id', flat=True)
+        )
+        votes = await sync_to_async(list)(
+            PrivateRoomVote.objects.filter(private_room_event=current_event)
+            .select_related('participant')
+        )
+        voted_participant_ids = [vote.participant_id for vote in votes]
+
+        if set(participants).issubset(set(voted_participant_ids)):
+            #All particpants have voted, check if it is a match
+            vote_values = [vote.vote for vote in votes]
+            all_yes = all(vote_values)
+
+            # Get the next event and make it current
+            next_event = await sync_to_async(
+                lambda: PrivateRoomEvent.objects.filter(private_room=room, is_current=False).first()
+            )()
+            next_event.is_current = True
+            await sync_to_async(next_event.save)()
+            event = await sync_to_async(lambda: next_event.event)()
+            next_event_serialized = await serialize_event(event, False)
+
+            # Delete the current event
+            current_event = await sync_to_async(
+                lambda: PrivateRoomEvent.objects.filter(private_room=room, is_current=True).first()
+            )()
+            await sync_to_async(current_event.delete)()
+            event = await sync_to_async(lambda: current_event.event)()
+            current_event_serialized = await serialize_event(event, False)
+
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    'type': 'vote_finished',
+                    'is_match': all_yes,
+                    'next_event': next_event_serialized,
+                    'current_event': current_event_serialized
+                }
+            )
 
     async def vote_cast(self, event):
         await self.send(text_data=json.dumps({
@@ -184,4 +232,12 @@ class PrivateRoomConsumer(AsyncWebsocketConsumer):
             'user': event['user'],
             'vote': event['vote'],
             'vote_results': event['vote_results'],
+        }))
+
+    async def vote_finished(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'vote_finished',
+            'is_match': event['is_match'],
+            'next_event': event['next_event'],
+            'current_event': event['current_event'],
         }))

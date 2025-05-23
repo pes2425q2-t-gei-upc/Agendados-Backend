@@ -6,9 +6,15 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 800px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
+        }
+
+        .main-container {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 20px;
         }
 
         .container {
@@ -16,6 +22,67 @@
             border-radius: 8px;
             padding: 20px;
             margin-bottom: 20px;
+        }
+
+        .participants-panel {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+
+        .participants-panel h3 {
+            margin-top: 0;
+            color: #495057;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+
+        .participant-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .participant-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            margin-bottom: 5px;
+            background-color: white;
+            border-radius: 6px;
+            border-left: 3px solid #007bff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .participant-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: #007bff;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 10px;
+            font-size: 14px;
+        }
+
+        .participant-name {
+            font-weight: 500;
+            color: #495057;
+        }
+
+        .participants-count {
+            color: #6c757d;
+            font-size: 0.9em;
+            margin-top: 10px;
+            text-align: center;
+            font-style: italic;
         }
 
         #messageArea {
@@ -30,30 +97,42 @@
 
         .message {
             margin-bottom: 8px;
-            padding: 5px;
-            border-radius: 4px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border-left: 4px solid transparent;
         }
 
         .user-joined {
             background-color: #d4edda;
             color: #155724;
+            border-left-color: #28a745;
             font-style: italic;
         }
 
         .user-left {
             background-color: #f8d7da;
             color: #721c24;
+            border-left-color: #dc3545;
             font-style: italic;
         }
 
         .chat-message {
             background-color: #e3f2fd;
             color: #0d47a1;
+            border-left-color: #2196f3;
         }
 
         .system-message {
             background-color: #fff3cd;
             color: #856404;
+            border-left-color: #ffc107;
+            font-weight: bold;
+        }
+
+        .room-started {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border-left-color: #17a2b8;
             font-weight: bold;
         }
 
@@ -105,6 +184,17 @@
             font-size: 0.8em;
             color: #666;
         }
+
+        @media (max-width: 768px) {
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+
+            .participants-panel {
+                position: static;
+                order: -1;
+            }
+        }
     </style>
 </head>
 <body>
@@ -119,43 +209,89 @@
         <button id="disconnectBtn" onclick="disconnectWebSocket()" disabled>Disconnect</button>
     </div>
 
-    <div class="container">
-        <h3>Messages</h3>
-        <div id="messageArea"></div>
+    <div class="main-container">
+        <div class="left-panel">
+            <div class="container">
+                <h3>Messages</h3>
+                <div id="messageArea"></div>
+                <button id="startRoomBtn" onclick="startRoom()" disabled>Start Room</button>
+            </div>
+        </div>
 
-        <input type="text" id="messageInput" placeholder="Type a message..." disabled>
-        <button id="sendBtn" onclick="sendMessage()" disabled>Send</button>
-        <button onclick="clearMessages()">Clear</button>
+        <div class="participants-panel">
+            <h3>👥 Room Participants</h3>
+            <ul id="participantsList" class="participant-list">
+                <li style="text-align: center; color: #6c757d; font-style: italic; padding: 20px;">
+                    Connect to a room to see participants
+                </li>
+            </ul>
+            <div id="participantsCount" class="participants-count"></div>
+        </div>
     </div>
 
     <script>
         let socket;
         let isConnected = false;
+        let currentParticipants = [];
 
         function updateConnectionStatus(status, message) {
             const statusElement = document.getElementById('connectionStatus');
             const connectBtn = document.getElementById('connectBtn');
             const disconnectBtn = document.getElementById('disconnectBtn');
-            const messageInput = document.getElementById('messageInput');
-            const sendBtn = document.getElementById('sendBtn');
+            const startRoomBtn = document.getElementById('startRoomBtn');
 
             if (status === 'connected') {
                 statusElement.textContent = `Connected - ${message}`;
                 statusElement.className = 'connection-status connected';
                 connectBtn.disabled = true;
                 disconnectBtn.disabled = false;
-                messageInput.disabled = false;
-                sendBtn.disabled = false;
+                startRoomBtn.disabled = false;
                 isConnected = true;
             } else {
                 statusElement.textContent = `Disconnected - ${message}`;
                 statusElement.className = 'connection-status disconnected';
                 connectBtn.disabled = false;
                 disconnectBtn.disabled = true;
-                messageInput.disabled = true;
-                sendBtn.disabled = true;
+                startRoomBtn.disabled = true;
                 isConnected = false;
+
+                // Clear participants when disconnected
+                updateParticipantsList([]);
             }
+        }
+
+        function updateParticipantsList(participants) {
+            currentParticipants = participants;
+            const participantsList = document.getElementById('participantsList');
+            const participantsCount = document.getElementById('participantsCount');
+
+            participantsList.innerHTML = '';
+
+            if (participants.length === 0) {
+                participantsList.innerHTML = '<li style="text-align: center; color: #6c757d; font-style: italic; padding: 20px;">No participants in room</li>';
+                participantsCount.textContent = '';
+                return;
+            }
+
+            participants.forEach(participant => {
+                const listItem = document.createElement('li');
+                listItem.className = 'participant-item';
+
+                const avatar = document.createElement('div');
+                avatar.className = 'participant-avatar';
+                avatar.textContent = participant.username.charAt(0).toUpperCase();
+
+                const name = document.createElement('span');
+                name.className = 'participant-name';
+                name.textContent = participant.username;
+
+                listItem.appendChild(avatar);
+                listItem.appendChild(name);
+                participantsList.appendChild(listItem);
+            });
+
+            const count = participants.length;
+            participantsCount.textContent = `${count} participant${count !== 1 ? 's' : ''} online`;
         }
 
         function addMessage(content, type = 'system') {
@@ -196,18 +332,30 @@
 
                     switch(data.type) {
                         case 'user_joined':
-                            addMessage(`👋 ${data.user.username} joined the room`, 'user-joined');
+                            // Update participants list
+                            updateParticipantsList(data.participants);
+
+                            // Show join notification
+                            addMessage(`🟢 ${data.user_joined.username} joined the room`, 'user-joined');
                             break;
 
                         case 'user_left':
-                            addMessage(`👋 ${data.user.username} left the room`, 'user-left');
+                            // Update participants list
+                            updateParticipantsList(data.participants);
+
+                            // Show leave notification
+                            addMessage(`🔴 ${data.user_left.username} left the room`, 'user-left');
+                            break;
+
+                        case 'room_started':
+                            addMessage('🚀 The room has started!', 'room-started');
+                            addMessage(`📊 Vote on this event: ${data.event.title}`, 'system-message');
                             break;
 
                         default:
                             addMessage(`📝 ${JSON.stringify(data)}`, 'system-message');
                     }
                 } catch (e) {
-                    // If it's not JSON, treat as plain text
                     addMessage(`📝 ${event.data}`, 'system-message');
                 }
             };
@@ -231,21 +379,12 @@
             }
         }
 
-        function sendMessage() {
-            const messageInput = document.getElementById("messageInput");
-            const message = messageInput.value.trim();
-
-            if (!message) {
-                alert("Please enter a message.");
-                return;
-            }
-
+        function startRoom() {
             if (socket && socket.readyState === WebSocket.OPEN) {
                 const messageData = JSON.stringify({
-                    message: message
+                    action: "start_room"
                 });
                 socket.send(messageData);
-                messageInput.value = '';
             } else {
                 alert("WebSocket is not connected.");
             }
@@ -255,14 +394,6 @@
             document.getElementById('messageArea').innerHTML = '';
         }
 
-        // Allow Enter key to send messages
-        document.getElementById('messageInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter' && isConnected) {
-                sendMessage();
-            }
-        });
-
-        // Allow Enter key to connect
         document.getElementById('roomCode').addEventListener('keypress', function(e) {
             if (e.key === 'Enter' && !isConnected) {
                 connectWebSocket();

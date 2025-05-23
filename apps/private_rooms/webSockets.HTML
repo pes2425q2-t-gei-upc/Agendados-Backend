@@ -235,6 +235,14 @@
         </div>
     </div>
 
+    <div id="matchModal" style="display:none; position: fixed; top:0; left:0; width:100%; height:100%; background-color: rgba(0,0,0,0.5); z-index:9999; align-items: center; justify-content: center;">
+        <div style="background:white; padding: 30px; border-radius: 8px; max-width: 400px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+            <h2>🎉 ¡Evento confirmado!</h2>
+            <p id="matchEventTitle" style="font-size: 1.2em; font-weight: bold; margin: 20px 0;"></p>
+            <button onclick="closeMatchModal()" style="padding: 10px 20px; background-color: #28a745; color:white; border:none; border-radius:5px; font-weight:bold;">Cerrar</button>
+        </div>
+    </div>
+
     <script>
         let socket;
         let isConnected = false;
@@ -350,6 +358,7 @@
                             if (data.is_match) {
                                 addMessage(`🎉 The final event is: ${data.current_event.title}`, 'system-message');
                                 document.getElementById('votingArea').style.display = 'none';
+                                showMatchModal(data.current_event.title); // 👈 Añadido
                             } else {
                                 addMessage(`➡️ Next round! Vote on this event: ${data.next_event.title}`, 'system-message');
                                 showVotingArea(data.next_event.title);
@@ -416,6 +425,15 @@
                 connectWebSocket();
             }
         });
+
+        function showMatchModal(title) {
+            document.getElementById('matchEventTitle').textContent = title;
+            document.getElementById('matchModal').style.display = 'flex';
+        }
+
+        function closeMatchModal() {
+            document.getElementById('matchModal').style.display = 'none';
+        }
     </script>
 </body>
 </html>

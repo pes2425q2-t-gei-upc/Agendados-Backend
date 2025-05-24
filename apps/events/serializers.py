@@ -1,8 +1,6 @@
-from django.conf import settings
 from rest_framework import serializers
-from .models import Event, Category, Scope, EventImage, EventLink, UserEvent
+from .models import Event, Category, Scope, EventImage, EventLink, UserEvent, UserReportedEvent
 from ..locations.serializers import LocationSerializer
-import os
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -83,3 +81,8 @@ class ShareLinkSerializer(serializers.ModelSerializer):
     
     def get_share_link(self, obj):
         return f"agendados://event/{obj.id}"
+
+class UserReportedEventSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserReportedEvent
+        fields = ['event', 'reason']

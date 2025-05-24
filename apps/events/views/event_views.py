@@ -5,9 +5,11 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_201_CREATED
 
-from apps.events.models import Event, Category
-from apps.events.serializers import EventSerializer, EventSummarizedSerializer, ShareLinkSerializer
+from apps.events.models import Event, Category, UserReportedEvent
+from apps.events.serializers import EventSerializer, EventSummarizedSerializer, ShareLinkSerializer, \
+    UserReportedEventSerializer
 from apps.events.services.event_recommender import event_recommender
 
 
@@ -50,3 +52,22 @@ def generate_share_link(request, event_id):
         return Response(serializer.data)
     except Event.DoesNotExist:
         return Response({"error": "Evento no encontrado"}, status=404)
+
+
+@api_view(['POST'])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def report_event(request, event_id):
+    event = get_object_or_404(Event, id=event_id)
+
+    # Prevent duplicate report
+    if UserReportedEvent.objects.filter(user=request.user, event=event).exists():
+        return Response(status=400)
+
+    reason = request.data.get('reason', None)
+    UserReportedEvent.objects.create(
+        user=request.user,
+        event=event,
+        reason=reason
+    )
+    return Response(status=HTTP_201_CREATED)

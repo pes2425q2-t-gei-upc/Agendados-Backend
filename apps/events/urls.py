@@ -16,4 +16,5 @@ urlpatterns = [
     path("discarded", userdiscardedevent_views.get_user_discarded, name="get_user_discarded"),
     path("<int:event_id>/share", event_views.generate_share_link, name="generate_share_link"),
     path("<int:event_id>/ics", schedule_views.generate_ics, name="add_or_remove_discarded"),
+    path("<int:event_id>/report", event_views.report_event, name="report_event"),
 ]

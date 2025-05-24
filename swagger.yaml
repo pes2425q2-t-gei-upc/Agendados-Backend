@@ -784,6 +784,76 @@ paths:
         "500":
           description: Error interno del servidor
 
+  /api/events/{event_id}/report:
+    post:
+      summary: Report an event
+      description: Allows an authenticated user to report an event by providing a reason.
+      operationId: reportEvent
+      tags:
+        - events
+      parameters:
+        - name: event_id
+          in: path
+          required: true
+          description: ID of the event to report
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - reason
+              properties:
+                reason:
+                  type: string
+                  example: "Inappropriate content or misleading information"
+      responses:
+        '201':
+          description: Event reported successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Event reported successfully
+        '400':
+          description: Validation error or event already reported
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: You have already reported this event
+        '401':
+          description: Authentication credentials were not provided or invalid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: Authentication credentials were not provided.
+        '404':
+          description: Event not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Evento no encontrado
+      security:
+        - TokenAuth: [ ]
+
   /api/users/auth/google/:
     post:
       operationId: google_auth

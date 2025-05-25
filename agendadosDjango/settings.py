@@ -69,6 +69,7 @@ INSTALLED_APPS = [
     "apps.locations",
     "apps.importer",
     "apps.chat",
+    "apps.private_rooms",
     "channels",
     "corsheaders",
     "storages",

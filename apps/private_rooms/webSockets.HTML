@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Private Room WebSocket Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .main-container {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 20px;
+        }
+
+        .container {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .participants-panel {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+
+        .participants-panel h3 {
+            margin-top: 0;
+            color: #495057;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+
+        .participant-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .participant-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            margin-bottom: 5px;
+            background-color: white;
+            border-radius: 6px;
+            border-left: 3px solid #007bff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .participant-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: #007bff;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 10px;
+            font-size: 14px;
+        }
+
+        .participant-name {
+            font-weight: 500;
+            color: #495057;
+        }
+
+        .participants-count {
+            color: #6c757d;
+            font-size: 0.9em;
+            margin-top: 10px;
+            text-align: center;
+            font-style: italic;
+        }
+
+        #messageArea {
+            height: 400px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+            background-color: #f9f9f9;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+
+        .message {
+            margin-bottom: 8px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border-left: 4px solid transparent;
+        }
+
+        .user-joined {
+            background-color: #d4edda;
+            color: #155724;
+            border-left-color: #28a745;
+            font-style: italic;
+        }
+
+        .user-left {
+            background-color: #f8d7da;
+            color: #721c24;
+            border-left-color: #dc3545;
+            font-style: italic;
+        }
+
+        .chat-message {
+            background-color: #e3f2fd;
+            color: #0d47a1;
+            border-left-color: #2196f3;
+        }
+
+        .system-message {
+            background-color: #fff3cd;
+            color: #856404;
+            border-left-color: #ffc107;
+            font-weight: bold;
+        }
+
+        .room-started {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border-left-color: #17a2b8;
+            font-weight: bold;
+        }
+
+        .connection-status {
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .connected {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .disconnected {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        input[type="text"] {
+            width: 200px;
+            padding: 8px;
+            margin: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            padding: 8px 16px;
+            margin: 5px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .timestamp {
+            font-size: 0.8em;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                grid-template-columns: 1fr;
+            }
+
+            .participants-panel {
+                position: static;
+                order: -1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>WebSocket Test for Private Room</h1>
+
+    <div class="container">
+        <h3>Connection</h3>
+        <div id="connectionStatus" class="connection-status disconnected">Disconnected</div>
+        <input type="text" id="roomCode" placeholder="Enter room code (e.g., HWFZ8)" value="HWFZ8">
+        <button id="connectBtn" onclick="connectWebSocket()">Connect</button>
+        <button id="disconnectBtn" onclick="disconnectWebSocket()" disabled>Disconnect</button>
+    </div>
+
+    <div class="main-container">
+        <div class="left-panel">
+            <div class="container">
+                <h3>Messages</h3>
+                <div id="messageArea"></div>
+                <button id="startRoomBtn" onclick="startRoom()" disabled>Start Room</button>
+                <div id="votingArea" style="display:none; margin-top: 20px;">
+                    <h4>📊 Vote on Event</h4>
+                    <p id="eventTitle" style="font-weight: bold;"></p>
+                    <button onclick="castVote(true)">👍 Yes</button>
+                    <button onclick="castVote(false)">👎 No</button>
+                    <div id="voteResults" style="margin-top:10px; font-style: italic;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="participants-panel">
+            <h3>👥 Room Participants</h3>
+            <ul id="participantsList" class="participant-list">
+                <li style="text-align: center; color: #6c757d; font-style: italic; padding: 20px;">
+                    Connect to a room to see participants
+                </li>
+            </ul>
+            <div id="participantsCount" class="participants-count"></div>
+        </div>
+    </div>
+
+    <div id="matchModal" style="display:none; position: fixed; top:0; left:0; width:100%; height:100%; background-color: rgba(0,0,0,0.5); z-index:9999; align-items: center; justify-content: center;">
+        <div style="background:white; padding: 30px; border-radius: 8px; max-width: 400px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+            <h2>🎉 ¡Evento confirmado!</h2>
+            <p id="matchEventTitle" style="font-size: 1.2em; font-weight: bold; margin: 20px 0;"></p>
+            <button onclick="closeMatchModal()" style="padding: 10px 20px; background-color: #28a745; color:white; border:none; border-radius:5px; font-weight:bold;">Cerrar</button>
+        </div>
+    </div>
+
+    <script>
+        let socket;
+        let isConnected = false;
+        let currentParticipants = [];
+
+        function updateConnectionStatus(status, message) {
+            const statusElement = document.getElementById('connectionStatus');
+            const connectBtn = document.getElementById('connectBtn');
+            const disconnectBtn = document.getElementById('disconnectBtn');
+            const startRoomBtn = document.getElementById('startRoomBtn');
+
+            if (status === 'connected') {
+                statusElement.textContent = `Connected - ${message}`;
+                statusElement.className = 'connection-status connected';
+                connectBtn.disabled = true;
+                disconnectBtn.disabled = false;
+                startRoomBtn.disabled = false;
+                isConnected = true;
+            } else {
+                statusElement.textContent = `Disconnected - ${message}`;
+                statusElement.className = 'connection-status disconnected';
+                connectBtn.disabled = false;
+                disconnectBtn.disabled = true;
+                startRoomBtn.disabled = true;
+                isConnected = false;
+
+                updateParticipantsList([]);
+                document.getElementById('votingArea').style.display = 'none';
+            }
+        }
+
+        function updateParticipantsList(participants) {
+            currentParticipants = participants;
+            const participantsList = document.getElementById('participantsList');
+            const participantsCount = document.getElementById('participantsCount');
+            participantsList.innerHTML = '';
+
+            if (participants.length === 0) {
+                participantsList.innerHTML = '<li style="text-align: center; color: #6c757d; font-style: italic; padding: 20px;">No participants in room</li>';
+                participantsCount.textContent = '';
+                return;
+            }
+
+            participants.forEach(participant => {
+                const listItem = document.createElement('li');
+                listItem.className = 'participant-item';
+
+                const avatar = document.createElement('div');
+                avatar.className = 'participant-avatar';
+                avatar.textContent = participant.username.charAt(0).toUpperCase();
+
+                const name = document.createElement('span');
+                name.className = 'participant-name';
+                name.textContent = participant.username;
+
+                listItem.appendChild(avatar);
+                listItem.appendChild(name);
+                participantsList.appendChild(listItem);
+            });
+
+            const count = participants.length;
+            participantsCount.textContent = `${count} participant${count !== 1 ? 's' : ''} online`;
+        }
+
+        function addMessage(content, type = 'system') {
+            const messageArea = document.getElementById('messageArea');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+
+            const timestamp = new Date().toLocaleTimeString();
+            messageDiv.innerHTML = `<span class="timestamp">[${timestamp}]</span> ${content}`;
+
+            messageArea.appendChild(messageDiv);
+            messageArea.scrollTop = messageArea.scrollHeight;
+        }
+
+        function connectWebSocket() {
+            const roomCode = document.getElementById("roomCode").value;
+            if (!roomCode) return alert("Please enter a room code.");
+
+            const token = "cef830d7430981641e14f16126d028a28b3fb1de";
+            socket = new WebSocket(`wss://agendados-backend-842309366027.europe-southwest1.run.app/ws/room/${roomCode}/?token=${token}`);
+
+            socket.onopen = () => {
+                updateConnectionStatus('connected', `Room: ${roomCode}`);
+                addMessage(`Connected to room: ${roomCode}`, 'system-message');
+            };
+
+            socket.onmessage = (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+                    switch(data.type) {
+                        case 'user_joined':
+                            updateParticipantsList(data.participants);
+                            addMessage(`🟢 ${data.user_joined.username} joined the room`, 'user-joined');
+                            break;
+                        case 'user_left':
+                            updateParticipantsList(data.participants);
+                            addMessage(`🔴 ${data.user_left.username} left the room`, 'user-left');
+                            break;
+                        case 'room_started':
+                            addMessage('🚀 The room has started!', 'room-started');
+                            addMessage(`📊 Vote on this event: ${data.event.title}`, 'system-message');
+                            showVotingArea(data.event.title);
+                            break;
+                        case 'vote_cast':
+                            const result = data.vote_results;
+                            const voter = data.user.username;
+                            addMessage(`🗳️ ${voter} voted ${data.vote ? 'YES' : 'NO'}`, 'chat-message');
+                            updateVoteResults(result);
+                            break;
+                        case 'vote_finished':
+                            if (data.is_match) {
+                                addMessage(`🎉 The final event is: ${data.current_event.title}`, 'system-message');
+                                document.getElementById('votingArea').style.display = 'none';
+                                showMatchModal(data.current_event.title); // 👈 Añadido
+                            } else {
+                                addMessage(`➡️ Next round! Vote on this event: ${data.next_event.title}`, 'system-message');
+                                showVotingArea(data.next_event.title);
+                                updateVoteResults({ true_votes: 0, false_votes: 0, total_votes: 0 });
+                            }
+                            break;
+                        default:
+                            console.log(data.type)
+                            addMessage(`📝 ${JSON.stringify(data)}`, 'system-message');
+                    }
+                } catch (e) {
+                    addMessage(`📝 ${event.data}`, 'system-message');
+                }
+            };
+
+
+            socket.onclose = (event) => {
+                updateConnectionStatus('disconnected', `Code: ${event.code}`);
+                addMessage(`Connection closed (Code: ${event.code})`, 'system-message');
+            };
+
+            socket.onerror = (error) => {
+                console.error("WebSocket error:", error);
+                addMessage(`❌ Connection error`, 'system-message');
+            };
+        }
+
+        function disconnectWebSocket() {
+            if (socket) {
+                socket.close();
+                socket = null;
+            }
+        }
+
+        function startRoom() {
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify({ action: "start_room" }));
+            } else {
+                alert("WebSocket is not connected.");
+            }
+        }
+
+        function castVote(voteValue) {
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify({
+                    action: "vote",
+                    vote: voteValue
+                }));
+            }
+        }
+
+        function showVotingArea(title) {
+            document.getElementById("eventTitle").textContent = title;
+            document.getElementById("votingArea").style.display = 'block';
+        }
+
+        function updateVoteResults(results) {
+            document.getElementById("voteResults").textContent =
+                `✅ Yes: ${results.true_votes}, ❌ No: ${results.false_votes}, Total: ${results.total_votes}`;
+        }
+
+        document.getElementById('roomCode').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !isConnected) {
+                connectWebSocket();
+            }
+        });
+
+        function showMatchModal(title) {
+            document.getElementById('matchEventTitle').textContent = title;
+            document.getElementById('matchModal').style.display = 'flex';
+        }
+
+        function closeMatchModal() {
+            document.getElementById('matchModal').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

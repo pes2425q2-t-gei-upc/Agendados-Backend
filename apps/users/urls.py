@@ -2,6 +2,8 @@ from django.urls import path
 from apps.users.views import auth_views, friendship_views, user_views, forgot_password_views
 from .views.auth_views import google_auth
 
+from apps.users.views import notification_views
+
 urlpatterns = [
     #Auth urls
     path("login", auth_views.login, name="login"),
@@ -18,4 +20,10 @@ urlpatterns = [
     path("all", user_views.get_users, name="get_users"),
     path("friendships/pending", friendship_views.get_pending_friend_requests, name="get_pending_friend_requests"),
     path('auth/google/', google_auth, name='google-auth'),
+
+    # Notificaciones y FCM
+    path('notifications/register-fcm-token', notification_views.register_fcm_token, name='register_fcm_token'),
+    path('notifications/send-push', notification_views.send_push_notification, name='send_push_notification'),
+    path('notifications/list', notification_views.list_notifications, name='list_notifications'),
+    path('notifications/mark-read', notification_views.mark_notification_read, name='mark_notification_read'),
 ]

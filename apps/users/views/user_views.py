@@ -7,7 +7,7 @@ from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_201_CR
 from django.contrib.auth.models import User
 from django.db.models import Q
 
-from apps.users.seralizers import UserSerializer
+from apps.users.serializers import UserSerializer
 
 
 @api_view(["GET"])

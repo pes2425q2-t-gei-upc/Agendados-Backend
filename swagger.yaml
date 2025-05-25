@@ -942,3 +942,172 @@ paths:
                     example: 4
         '401':
           description: No autorizado. Token de autenticación requerido.
+           
+  /api/users/notifications/register-fcm-token:
+    post:
+      operationId: register_fcm_token
+      description: "Registra o actualiza el token FCM del usuario autenticado"
+      security:
+        - TokenAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+                  description: "Token FCM del dispositivo"
+              required:
+                - token
+      responses:
+        "200":
+          description: "Token registrado correctamente"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  user:
+                    type: integer
+                  token:
+                    type: string
+                  created_at:
+                    type: string
+                    format: date-time
+                  updated_at:
+                    type: string
+                    format: date-time
+        "400":
+          description: "Token no proporcionado"
+        "401":
+          description: "No autorizado - Token de autenticación inválido o ausente"
+      tags:
+        - notifications
+
+  /api/users/notifications/send-push:
+    post:
+      operationId: send_push_notification
+      description: "Envía una notificación push a un usuario específico"
+      security:
+        - TokenAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                  description: "ID del usuario al que enviar la notificación"
+                title:
+                  type: string
+                  description: "Título de la notificación"
+                body:
+                  type: string
+                  description: "Cuerpo/mensaje de la notificación"
+                data:
+                  type: object
+                  description: "Datos adicionales para la notificación (opcional)"
+              required:
+                - user_id
+                - title
+                - body
+      responses:
+        "200":
+          description: "Notificación enviada correctamente"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  result:
+                    type: object
+        "400":
+          description: "Faltan parámetros requeridos"
+        "401":
+          description: "No autorizado - Token de autenticación inválido o ausente"
+        "404":
+          description: "Usuario no encontrado o sin token FCM registrado"
+      tags:
+        - notifications
+
+  /api/users/notifications/list:
+    get:
+      operationId: list_notifications
+      description: "Lista todas las notificaciones internas del usuario autenticado"
+      security:
+        - TokenAuth: []
+      responses:
+        "200":
+          description: "Lista de notificaciones"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    user:
+                      type: integer
+                    title:
+                      type: string
+                    body:
+                      type: string
+                    is_read:
+                      type: boolean
+                    created_at:
+                      type: string
+                      format: date-time
+        "401":
+          description: "No autorizado - Token de autenticación inválido o ausente"
+      tags:
+        - notifications
+
+  /api/users/notifications/mark-read:
+    post:
+      operationId: mark_notification_read
+      description: "Marca una notificación como leída"
+      security:
+        - TokenAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                notification_id:
+                  type: integer
+                  description: "ID de la notificación a marcar como leída"
+              required:
+                - notification_id
+      responses:
+        "200":
+          description: "Notificación marcada como leída correctamente"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+        "401":
+          description: "No autorizado - Token de autenticación inválido o ausente"
+        "404":
+          description: "Notificación no encontrada"
+      tags:
+        - notifications
+
+          
+   
+          
+          

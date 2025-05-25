@@ -6,7 +6,7 @@ from apps.events.serializers import EventSerializer
 from apps.private_rooms.models import PrivateRoom, PrivateRoomEvent, PrivateRoomVote
 import json
 
-from apps.users.seralizers import UserSerializer
+from apps.users.serializers import UserSerializer
 
 @sync_to_async
 def serialize_user(user, many=False):

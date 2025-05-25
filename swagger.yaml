@@ -1100,14 +1100,61 @@ paths:
                 properties:
                   success:
                     type: boolean
+        "400":
+          description: "ID de notificación no proporcionado o inválido"
         "401":
           description: "No autorizado - Token de autenticación inválido o ausente"
         "404":
           description: "Notificación no encontrada"
       tags:
         - notifications
-
-          
-   
-          
-          
+        
+  /api/users/profile/update-image:
+    post:
+      operationId: update_profile_image
+      description: "Actualiza la imagen de perfil del usuario autenticado. La imagen se almacena en AWS S3."
+      security:
+        - TokenAuth: []
+      tags:
+        - users
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                profile_image:
+                  type: string
+                  format: binary
+                  description: "Archivo de imagen para el perfil del usuario"
+              required:
+                - profile_image
+      responses:
+        "200":
+          description: "Imagen de perfil actualizada correctamente"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  username:
+                    type: string
+                    example: "johndoe"
+                  email:
+                    type: string
+                    example: "johndoe@example.com"
+                  language:
+                    type: string
+                    example: "cat"
+                  profile_image:
+                    type: string
+                    format: uri
+                    example: "https://agendados-bucket.s3.eu-central-1.amazonaws.com/profile_images/1/profile.jpg"
+        "400":
+          description: "No se ha enviado ninguna imagen o el formato es inválido"
+        "401":
+          description: "No autorizado - Token de autenticación inválido o ausente"

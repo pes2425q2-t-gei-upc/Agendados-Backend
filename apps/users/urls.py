@@ -26,4 +26,7 @@ urlpatterns = [
     path('notifications/send-push', notification_views.send_push_notification, name='send_push_notification'),
     path('notifications/list', notification_views.list_notifications, name='list_notifications'),
     path('notifications/mark-read', notification_views.mark_notification_read, name='mark_notification_read'),
+    
+    # Perfil de usuario
+    path('profile/update-image', user_views.update_profile_image, name='update_profile_image'),
 ]

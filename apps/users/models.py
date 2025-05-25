@@ -1,9 +1,13 @@
 from django.contrib.auth.models import User
 from django.db import models
 
+def user_profile_image_path(instance, filename):
+    return f'profile_images/{instance.user.id}/{filename}'
+
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     language = models.CharField(max_length=20, default="cat")
+    profile_image = models.ImageField(upload_to=user_profile_image_path, null=True, blank=True)
 
     def __str__(self):
         return self.user.username

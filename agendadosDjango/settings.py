@@ -195,6 +195,15 @@ AWS_STORAGE_BUCKET_NAME = 'agendados-bucket'
 AWS_S3_REGION_NAME = 'eu-central-1'
 AWS_S3_FILE_OVERWRITE = False
 AWS_DEFAULT_ACL = 'public-read'
+AWS_S3_ADDRESSING_STYLE = 'virtual'
+AWS_S3_SIGNATURE_VERSION = 's3v4'
+# Establecer a False para que Django arroje error si no puede conectar con S3
+AWS_S3_VERIFY = True
+# Desactivar el fallback a almacenamiento local si hay errores con S3
+AWS_S3_USE_SSL = True
+# Añadir timeout para conexiones a S3
+AWS_S3_CONNECT_TIMEOUT = 5
+AWS_S3_READ_TIMEOUT = 10
 AWS_S3_OBJECT_PARAMETERS = {
     'CacheControl': 'max-age=86400',
 }

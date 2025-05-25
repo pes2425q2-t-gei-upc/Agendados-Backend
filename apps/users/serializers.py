@@ -1,18 +1,32 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from apps.users.models import FriendRequest, UserFCMToken, Notification
+from apps.users.models import FriendRequest, UserFCMToken, Notification, UserProfile
 
 class UserSerializer(serializers.ModelSerializer):
     language = serializers.SerializerMethodField()
+    profile_image = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ["id", "username", "email", "language"]
+        fields = ["id", "username", "email", "language", "profile_image"]
 
     def get_language(self, obj):
         profile = getattr(obj, 'userprofile', None)
         if profile:
             return profile.language
+        return None
+        
+    def get_profile_image(self, obj):
+        profile = getattr(obj, 'userprofile', None)
+        if profile and profile.profile_image:
+            # Obtener la URL completa de S3
+            url = profile.profile_image.url
+            if url.startswith('/'):
+                from django.conf import settings
+                bucket_name = settings.AWS_STORAGE_BUCKET_NAME
+                region = settings.AWS_S3_REGION_NAME
+                url = f"https://{bucket_name}.s3.{region}.amazonaws.com{url}"
+            return url
         return None
 
 class FriendRequestSerializer(serializers.ModelSerializer):

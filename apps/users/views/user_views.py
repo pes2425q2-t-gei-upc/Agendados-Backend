@@ -1,14 +1,15 @@
 from django.contrib.auth import update_session_auth_hash
 from rest_framework.authentication import TokenAuthentication
-from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.decorators import api_view, authentication_classes, permission_classes, parser_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_201_CREATED
+from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_201_CREATED, HTTP_404_NOT_FOUND
 from django.contrib.auth.models import User
 from django.db.models import Q
+from rest_framework.parsers import MultiPartParser, FormParser
 
 from apps.users.serializers import UserSerializer
-
+from apps.users.models import UserProfile
 
 @api_view(["GET"])
 @authentication_classes([TokenAuthentication])
@@ -58,3 +59,33 @@ def update_password(request):
     return Response(
         status=HTTP_200_OK
     )
+
+@api_view(["POST"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+@parser_classes([MultiPartParser, FormParser])
+def update_profile_image(request):
+    """
+    Endpoint para subir o actualizar la imagen de perfil del usuario.
+    La imagen se almacenará en Amazon S3.
+    """
+    try:
+        profile, _ = UserProfile.objects.get_or_create(user=request.user)
+        
+        if 'profile_image' not in request.FILES:
+            return Response(
+                {"error": "No se ha enviado ninguna imagen"},
+                status=HTTP_400_BAD_REQUEST
+            )
+        
+        profile.profile_image = request.FILES['profile_image']
+        profile.save()
+        
+        serializer = UserSerializer(request.user)
+        return Response(serializer.data, status=HTTP_200_OK)
+        
+    except Exception as e:
+        return Response(
+            {"error": str(e)},
+            status=HTTP_400_BAD_REQUEST
+        )

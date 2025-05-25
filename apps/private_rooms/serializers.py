@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from apps.private_rooms.models import PrivateRoom
-from apps.users.seralizers import UserSerializer
+from apps.users.serializers import UserSerializer
 
 
 class PrivateRoomSerializer(serializers.ModelSerializer):

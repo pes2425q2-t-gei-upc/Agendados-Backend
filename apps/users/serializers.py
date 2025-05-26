@@ -1,18 +1,25 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from apps.users.models import FriendRequest, UserFCMToken, Notification
+from apps.users.models import FriendRequest, UserFCMToken, Notification, UserProfile
 
 class UserSerializer(serializers.ModelSerializer):
     language = serializers.SerializerMethodField()
+    profile_image = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ["id", "username", "email", "language"]
+        fields = ["id", "username", "email", "language", "profile_image"]
 
     def get_language(self, obj):
         profile = getattr(obj, 'userprofile', None)
         if profile:
             return profile.language
+        return None
+        
+    def get_profile_image(self, obj):
+        profile = getattr(obj, 'userprofile', None)
+        if profile:
+            return profile.profile_image_url
         return None
 
 class FriendRequestSerializer(serializers.ModelSerializer):

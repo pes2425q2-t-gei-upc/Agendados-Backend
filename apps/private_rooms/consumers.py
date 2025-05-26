@@ -1,3 +1,6 @@
+from datetime import timedelta
+
+from django.utils import timezone
 from asgiref.sync import sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 
@@ -62,7 +65,8 @@ class PrivateRoomConsumer(AsyncWebsocketConsumer):
             {
                 'type': 'user_joined',
                 'participants': serialized_participants,
-                'user_joined': serialized_user
+                'user_joined': serialized_user,
+                'room_name': room.name
             }
         )
 
@@ -97,6 +101,7 @@ class PrivateRoomConsumer(AsyncWebsocketConsumer):
             'type': 'user_joined',
             'participants': event['participants'],
             'user_joined': event['user_joined'],
+            'room_name': event['room_name'],
         }))
 
     # Handler for user_left event
@@ -128,7 +133,11 @@ class PrivateRoomConsumer(AsyncWebsocketConsumer):
         await sync_to_async(room.save)()
 
         # Notify all participants
-        events = await sync_to_async(lambda: list(Event.objects.order_by('-id')[:50]))()
+        max_date = timezone.now() + timedelta(days=365 * 10)
+        events = await sync_to_async(lambda: list(Event.objects.filter(
+            date_ini__gt=timezone.now(),
+            date_ini__lt=max_date
+        ).order_by('?')))()
         events_serialized = await serialize_event(events, True)
         # Create PrivateRoomEvent instances for each event
         await sync_to_async(PrivateRoomEvent.objects.filter(private_room=room).delete)()

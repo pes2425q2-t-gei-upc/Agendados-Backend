@@ -85,6 +85,18 @@
             font-style: italic;
         }
 
+        .room-name-display {
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: #e3f2fd;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: bold;
+            color: #0d47a1;
+            display: none;
+            border: 2px solid #2196f3;
+        }
+
         #messageArea {
             height: 400px;
             overflow-y: auto;
@@ -225,6 +237,9 @@
         </div>
 
         <div class="participants-panel">
+            <div id="roomNameDisplay" class="room-name-display">
+                <span id="roomNameText"></span>
+            </div>
             <h3>👥 Room Participants</h3>
             <ul id="participantsList" class="participant-list">
                 <li style="text-align: center; color: #6c757d; font-style: italic; padding: 20px;">
@@ -247,15 +262,20 @@
         let socket;
         let isConnected = false;
         let currentParticipants = [];
+        let roomCode = '';
 
-        function updateConnectionStatus(status, message) {
+        function updateConnectionStatus(status, message, roomName = null) {
             const statusElement = document.getElementById('connectionStatus');
             const connectBtn = document.getElementById('connectBtn');
             const disconnectBtn = document.getElementById('disconnectBtn');
             const startRoomBtn = document.getElementById('startRoomBtn');
 
             if (status === 'connected') {
-                statusElement.textContent = `Connected - ${message}`;
+                let statusText = `Connected - Room: ${message}`;
+                if (roomName) {
+                    statusText += ` (${roomName})`;
+                }
+                statusElement.textContent = statusText;
                 statusElement.className = 'connection-status connected';
                 connectBtn.disabled = true;
                 disconnectBtn.disabled = false;
@@ -272,6 +292,18 @@
                 updateParticipantsList([]);
                 document.getElementById('votingArea').style.display = 'none';
             }
+        }
+
+        function displayRoomName(roomName) {
+            const roomNameDisplay = document.getElementById('roomNameDisplay');
+            const roomNameText = document.getElementById('roomNameText');
+
+            roomNameText.textContent = `📍 ${roomName}`;
+            roomNameDisplay.style.display = 'block';
+        }
+
+        function hideRoomName() {
+            document.getElementById('roomNameDisplay').style.display = 'none';
         }
 
         function updateParticipantsList(participants) {
@@ -320,14 +352,14 @@
         }
 
         function connectWebSocket() {
-            const roomCode = document.getElementById("roomCode").value;
+            roomCode = document.getElementById("roomCode").value;
             if (!roomCode) return alert("Please enter a room code.");
 
             const token = "f5944b2c543a7115af8c4c2558c405568f67c1b3";
-            socket = new WebSocket(`wss://agendados-backend-842309366027.europe-southwest1.run.app/ws/room/${roomCode}/?token=${token}`);
+            socket = new WebSocket(`ws://localhost:8080/ws/room/${roomCode}/?token=${token}`);
 
             socket.onopen = () => {
-                updateConnectionStatus('connected', `Room: ${roomCode}`);
+                updateConnectionStatus('connected', roomCode);
                 addMessage(`Connected to room: ${roomCode}`, 'system-message');
             };
 
@@ -338,6 +370,12 @@
                         case 'user_joined':
                             updateParticipantsList(data.participants);
                             addMessage(`🟢 ${data.user_joined.username} joined the room`, 'user-joined');
+
+                            // Display room name if provided
+                            if (data.room_name) {
+                                displayRoomName(data.room_name);
+                                updateConnectionStatus('connected', roomCode, data.room_name);
+                            }
                             break;
                         case 'user_left':
                             updateParticipantsList(data.participants);
@@ -346,6 +384,7 @@
                         case 'room_started':
                             addMessage('🚀 The room has started!', 'room-started');
                             addMessage(`📊 Vote on this event: ${data.event.title}`, 'system-message');
+                            addMessage(`Event start date: ${data.event.date_ini}`, 'system-message');
                             showVotingArea(data.event.title);
                             break;
                         case 'vote_cast':
@@ -358,9 +397,10 @@
                             if (data.is_match) {
                                 addMessage(`🎉 The final event is: ${data.current_event.title}`, 'system-message');
                                 document.getElementById('votingArea').style.display = 'none';
-                                showMatchModal(data.current_event.title); // 👈 Añadido
+                                showMatchModal(data.current_event.title);
                             } else {
                                 addMessage(`➡️ Next round! Vote on this event: ${data.next_event.title}`, 'system-message');
+                                addMessage(`Event start date: ${data.next_event.date_ini}`, 'system-message');
                                 showVotingArea(data.next_event.title);
                                 updateVoteResults({ true_votes: 0, false_votes: 0, total_votes: 0 });
                             }
@@ -374,10 +414,10 @@
                 }
             };
 
-
             socket.onclose = (event) => {
                 updateConnectionStatus('disconnected', `Code: ${event.code}`);
                 addMessage(`Connection closed (Code: ${event.code})`, 'system-message');
+                hideRoomName();
             };
 
             socket.onerror = (error) => {
@@ -390,6 +430,7 @@
             if (socket) {
                 socket.close();
                 socket = null;
+                hideRoomName();
             }
         }
 

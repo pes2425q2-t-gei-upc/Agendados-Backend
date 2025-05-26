@@ -7,7 +7,7 @@ def user_profile_image_path(instance, filename):
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     language = models.CharField(max_length=20, default="cat")
-    profile_image = models.ImageField(upload_to=user_profile_image_path, null=True, blank=True)
+    profile_image_url = models.CharField(max_length=500, blank=True)
 
     def __str__(self):
         return self.user.username

@@ -18,15 +18,8 @@ class UserSerializer(serializers.ModelSerializer):
         
     def get_profile_image(self, obj):
         profile = getattr(obj, 'userprofile', None)
-        if profile and profile.profile_image:
-            # Obtener la URL completa de S3
-            url = profile.profile_image.url
-            if url.startswith('/'):
-                from django.conf import settings
-                bucket_name = settings.AWS_STORAGE_BUCKET_NAME
-                region = settings.AWS_S3_REGION_NAME
-                url = f"https://{bucket_name}.s3.{region}.amazonaws.com{url}"
-            return url
+        if profile:
+            return profile.profile_image_url
         return None
 
 class FriendRequestSerializer(serializers.ModelSerializer):

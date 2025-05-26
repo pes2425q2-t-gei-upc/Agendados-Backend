@@ -384,6 +384,7 @@
                         case 'room_started':
                             addMessage('🚀 The room has started!', 'room-started');
                             addMessage(`📊 Vote on this event: ${data.event.title}`, 'system-message');
+                            addMessage(`Event start date: ${data.event.date_ini}`, 'system-message');
                             showVotingArea(data.event.title);
                             break;
                         case 'vote_cast':
@@ -399,6 +400,7 @@
                                 showMatchModal(data.current_event.title);
                             } else {
                                 addMessage(`➡️ Next round! Vote on this event: ${data.next_event.title}`, 'system-message');
+                                addMessage(`Event start date: ${data.next_event.date_ini}`, 'system-message');
                                 showVotingArea(data.next_event.title);
                                 updateVoteResults({ true_votes: 0, false_votes: 0, total_votes: 0 });
                             }

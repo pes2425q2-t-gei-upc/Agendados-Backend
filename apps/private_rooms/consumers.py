@@ -62,7 +62,8 @@ class PrivateRoomConsumer(AsyncWebsocketConsumer):
             {
                 'type': 'user_joined',
                 'participants': serialized_participants,
-                'user_joined': serialized_user
+                'user_joined': serialized_user,
+                'room_name': room.name
             }
         )
 
@@ -97,6 +98,7 @@ class PrivateRoomConsumer(AsyncWebsocketConsumer):
             'type': 'user_joined',
             'participants': event['participants'],
             'user_joined': event['user_joined'],
+            'room_name': event['room_name'],
         }))
 
     # Handler for user_left event

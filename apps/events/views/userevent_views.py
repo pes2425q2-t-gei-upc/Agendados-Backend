@@ -26,6 +26,8 @@ def get_user_favorites(request):
     return Response(serializer.data)
 
 
+# noqa: S5122 # nosec # NOSONAR
+# Este endpoint es deliberadamente público y solo devuelve información no sensible
 @api_view(["GET"])
 def get_user_favorites_by_id(request, user_id):
     try:

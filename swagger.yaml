@@ -95,7 +95,7 @@ paths:
   /api/events/favorites:
     get:
       operationId: listget_user_favorites
-      description: ""
+      description: "Obtiene los eventos favoritos del usuario autenticado"
       parameters: []
       responses:
         "200":
@@ -104,7 +104,39 @@ paths:
               schema:
                 type: array
                 items: {}
-          description: ""
+          description: "Lista de eventos favoritos del usuario"
+      tags:
+        - events
+  /api/events/user/{user_id}/favorites:
+    get:
+      operationId: listget_user_favorites_by_id
+      description: "Obtiene los eventos favoritos de un usuario específico por su ID"
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: "ID del usuario cuyos favoritos se quieren consultar"
+          schema:
+            type: integer
+            example: 1
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {}
+          description: "Lista de eventos favoritos del usuario especificado"
+        "404":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Usuario no encontrado"
+          description: "Usuario no encontrado"
       tags:
         - events
   /api/events/discarded:

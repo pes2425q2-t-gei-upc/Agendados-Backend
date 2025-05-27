@@ -1,6 +1,4 @@
 from django.shortcuts import get_object_or_404
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_http_methods
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import (
     api_view,
@@ -30,8 +28,6 @@ def get_user_favorites(request):
 
 
 @api_view(["GET"])
-@authentication_classes([TokenAuthentication])
-@permission_classes([IsAuthenticated])
 def get_user_favorites_by_id(request, user_id):
     try:
         target_user = User.objects.get(id=user_id)

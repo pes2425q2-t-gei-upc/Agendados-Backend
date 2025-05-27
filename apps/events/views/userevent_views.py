@@ -28,10 +28,10 @@ def get_user_favorites(request):
     return Response(serializer.data)
 
 
-# Este endpoint es deliberadamente público y solo devuelve información no sensible
-# sonar-disable-next-line:S5122
-@csrf_exempt
+
 @api_view(["GET"])
+@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
 def get_user_favorites_by_id(request, user_id):
     try:
         target_user = User.objects.get(id=user_id)

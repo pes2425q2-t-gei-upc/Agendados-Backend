@@ -137,16 +137,15 @@ class EventAPITest(TestCase):
         # Primero añadimos un evento a los favoritos del usuario
         self.client.post(reverse('add_or_remove_favorites', args=[self.event.id]))
         
-        # Luego probamos el endpoint sin autenticación
-        client = APIClient()
-        response = client.get(reverse('get_user_favorites_by_id', args=[self.user.id]))
+        # Probamos el endpoint con autenticación
+        response = self.client.get(reverse('get_user_favorites_by_id', args=[self.user.id]))
         
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]['id'], self.event.id)
         
         # Probamos con un usuario que no existe
-        response = client.get(reverse('get_user_favorites_by_id', args=[9999]))
+        response = self.client.get(reverse('get_user_favorites_by_id', args=[9999]))
         self.assertEqual(response.status_code, 404)
 
     def test_get_user_discarded(self):

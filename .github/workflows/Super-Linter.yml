@@ -19,8 +19,6 @@ jobs:
       packages: read
       # To report GitHub Actions status checks
       statuses: write
-      # Permiso para modificar workflows
-      workflows: write
 
     steps:
       - name: Checkout code
@@ -72,3 +70,4 @@ jobs:
           commit_message: " fix linting issues"
           commit_user_name: super-linter
           commit_user_email: super-linter@super-linter.dev
+          file_pattern: '!(*.github/workflows/**)' # Excluir archivos de workflow

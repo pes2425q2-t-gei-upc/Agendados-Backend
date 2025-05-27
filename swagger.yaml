@@ -111,6 +111,8 @@ paths:
     get:
       operationId: listget_user_favorites_by_id
       description: "Obtiene los eventos favoritos de un usuario específico por su ID"
+      security:
+        - TokenAuth: []
       parameters:
         - name: user_id
           in: path

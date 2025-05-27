@@ -12,6 +12,7 @@ urlpatterns = [
         name="add_or_remove_favorites",
     ),
     path("favorites", userevent_views.get_user_favorites, name="get_user_favorites"),
+    path("user/<int:user_id>/favorites", userevent_views.get_user_favorites_by_id, name="get_user_favorites_by_id"),
     path("<int:event_id>/discarded", userdiscardedevent_views.add_or_remove_discarded, name="add_or_remove_discarded"),
     path("discarded", userdiscardedevent_views.get_user_discarded, name="get_user_discarded"),
     path("<int:event_id>/share", event_views.generate_share_link, name="generate_share_link"),

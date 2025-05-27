@@ -11,6 +11,7 @@ from rest_framework.status import HTTP_201_CREATED, HTTP_200_OK, HTTP_404_NOT_FO
 
 from apps.events.models import Event, UserEvent
 from apps.events.serializers import EventSerializer
+from django.contrib.auth.models import User
 
 
 @api_view(["GET"])
@@ -23,6 +24,18 @@ def get_user_favorites(request):
     print(events)
     serializer = EventSerializer(events, many=True)
     return Response(serializer.data)
+
+
+@api_view(["GET"])
+def get_user_favorites_by_id(request, user_id):
+    try:
+        target_user = User.objects.get(id=user_id)
+        user_events = UserEvent.objects.filter(user=target_user)
+        events = [user_event.event for user_event in user_events]
+        serializer = EventSerializer(events, many=True)
+        return Response(serializer.data, status=HTTP_200_OK)
+    except User.DoesNotExist:
+        return Response({"error": "Usuario no encontrado"}, status=HTTP_404_NOT_FOUND)
 
 
 @api_view(["POST", "DELETE"])

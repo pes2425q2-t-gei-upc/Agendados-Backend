@@ -1,4 +1,6 @@
 from django.shortcuts import get_object_or_404
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import (
     api_view,
@@ -26,8 +28,9 @@ def get_user_favorites(request):
     return Response(serializer.data)
 
 
-# noqa: S5122 # nosec # NOSONAR
 # Este endpoint es deliberadamente público y solo devuelve información no sensible
+# sonar-disable-next-line:S5122
+@csrf_exempt
 @api_view(["GET"])
 def get_user_favorites_by_id(request, user_id):
     try:

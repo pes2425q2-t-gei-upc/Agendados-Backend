@@ -19,6 +19,8 @@ jobs:
       packages: read
       # To report GitHub Actions status checks
       statuses: write
+      # Permiso para modificar workflows
+      workflows: write
 
     steps:
       - name: Checkout code

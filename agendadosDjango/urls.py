@@ -16,8 +16,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include, re_path
-from rest_framework import permissions
 from apps.events.views import external_service_views
+from apps.users.views import reset_password_views
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -25,5 +25,7 @@ urlpatterns = [
     path("api/events/", include("apps.events.urls")),
     path("api/locations/", include("apps.locations.urls")),
     path("api/eventsInArea", external_service_views.get_events_in_area, name="get_events_in_area"),
-
+    path("api/chat/", include("apps.chat.urls")),
+    path("api/private_rooms/", include("apps.private_rooms.urls")),
+    path("reset-password/<uidb64>/<token>/", reset_password_views.ResetPasswordView.as_view(), name="reset_password"),
 ]

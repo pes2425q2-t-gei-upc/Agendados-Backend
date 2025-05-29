@@ -26,8 +26,31 @@ SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "dev-secret-key-for-testing")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = bool(os.environ.get("DEBUG", default=0))
 
-ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "127.0.0.1").split(",")
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    'agendados-backend-842309366027.europe-southwest1.run.app',
+]
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://agendados-backend-842309366027.europe-southwest1.run.app',
+]
+
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SAMESITE = 'Lax'
+
+#Email settings
+EMAIL_HOST = os.getenv('EMAIL_HOST', 'localhost')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', 25))
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'False') == 'True'
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'webmaster@localhost')
+EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
+
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', 'your_gemini_api_key')
 
 # Application definition
 
@@ -46,6 +69,7 @@ INSTALLED_APPS = [
     "apps.locations",
     "apps.importer",
     "apps.chat",
+    "apps.private_rooms",
     "channels",
     "corsheaders",
     "storages",
@@ -171,6 +195,23 @@ AWS_STORAGE_BUCKET_NAME = 'agendados-bucket'
 AWS_S3_REGION_NAME = 'eu-central-1'
 AWS_S3_FILE_OVERWRITE = False
 AWS_DEFAULT_ACL = 'public-read'
+AWS_S3_ADDRESSING_STYLE = 'virtual'
+AWS_S3_SIGNATURE_VERSION = 's3v4'
+# Establecer a False para que Django arroje error si no puede conectar con S3
+AWS_S3_VERIFY = True
+# Desactivar el fallback a almacenamiento local si hay errores con S3
+AWS_S3_USE_SSL = True
+# Añadir timeout para conexiones a S3
+AWS_S3_CONNECT_TIMEOUT = 5
+AWS_S3_READ_TIMEOUT = 10
 AWS_S3_OBJECT_PARAMETERS = {
     'CacheControl': 'max-age=86400',
 }
+
+# Google OAuth Settings
+GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID')
+GOOGLE_CLIENT_ID_ALCO = os.environ.get('GOOGLE_CLIENT_ID_ALCO')
+
+# Firebase Cloud Messaging (V1)
+FCM_SERVICE_ACCOUNT_FILE = os.path.join(BASE_DIR, 'jovial-engine-456715-j1-949cb1d80dd6.json')
+FCM_PROJECT_ID = 'jovial-engine-456715-j1'

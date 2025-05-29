@@ -8,7 +8,7 @@ from django.db.models import Q
 from django.contrib.auth.models import User
 
 from apps.users.models import Friendship, FriendRequest
-from apps.users.seralizers import UserSerializer, FriendRequestSerializer
+from apps.users.serializers import UserSerializer, FriendRequestSerializer
 
 
 @api_view(["GET"])

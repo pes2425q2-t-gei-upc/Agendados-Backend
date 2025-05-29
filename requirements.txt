@@ -20,3 +20,8 @@ daphne
 PyJWT
 boto3
 django-storages
+requests
+google-auth>=2.16.0
+icalendar
+google-auth-oauthlib
+google-auth-httplib2

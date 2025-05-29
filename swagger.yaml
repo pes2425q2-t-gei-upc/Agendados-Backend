@@ -95,7 +95,7 @@ paths:
   /api/events/favorites:
     get:
       operationId: listget_user_favorites
-      description: ""
+      description: "Obtiene los eventos favoritos del usuario autenticado"
       parameters: []
       responses:
         "200":
@@ -104,7 +104,39 @@ paths:
               schema:
                 type: array
                 items: {}
-          description: ""
+          description: "Lista de eventos favoritos del usuario"
+      tags:
+        - events
+  /api/events/user/{user_id}/favorites:
+    get:
+      operationId: listget_user_favorites_by_id
+      description: "Obtiene los eventos favoritos de un usuario específico por su ID"
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          description: "ID del usuario cuyos favoritos se quieren consultar"
+          schema:
+            type: integer
+            example: 1
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {}
+          description: "Lista de eventos favoritos del usuario especificado"
+        "404":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Usuario no encontrado"
+          description: "Usuario no encontrado"
       tags:
         - events
   /api/events/discarded:
@@ -335,6 +367,46 @@ paths:
           description: "No autorizado - Token de autenticación inválido o no proporcionado"
       tags:
         - users
+  /api/users/forgot-password:
+    post:
+      operationId: create_forgot_password
+      description: "Envía un correo electrónico con un enlace para restablecer la contraseña del usuario"
+      tags:
+        - users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "johndoe@example.com"
+              required:
+                - email
+      responses:
+        "200":
+          description: "Correo enviado si el email está registrado. Siempre devuelve 200 por seguridad"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: "Si el correo existe, enviamos instrucciones para restablecer la contraseña."
+        "400":
+          description: "Falta el campo de correo electrónico"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: "El campo email es obligatorio."
   /api/users/test:
     post:
       operationId: createtest
@@ -720,3 +792,401 @@ paths:
         - TokenAuth: []
       tags:
         - events
+
+  /api/chat/events_where_user_messaged:
+    get:
+      operationId: get_events_by_user_has_messaged
+      description: Retorna una lista de eventos en los cuales el usuario autenticado ha participado enviando al menos un mensaje.
+      tags:
+        - chats
+      security:
+        - TokenAuth: []
+      responses:
+        "200":
+          description: Lista de eventos recuperada exitosamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items: {}
+        "401":
+          description: No autorizado - Token de autenticación inválido o ausente
+        "403":
+          description: Prohibido - El usuario no tiene permiso para acceder a estos datos
+        "500":
+          description: Error interno del servidor
+
+  /api/events/{event_id}/report:
+    post:
+      summary: Report an event
+      description: Allows an authenticated user to report an event by providing a reason.
+      operationId: reportEvent
+      tags:
+        - events
+      parameters:
+        - name: event_id
+          in: path
+          required: true
+          description: ID of the event to report
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - reason
+              properties:
+                reason:
+                  type: string
+                  example: "Inappropriate content or misleading information"
+      responses:
+        '201':
+          description: Event reported successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Event reported successfully
+        '400':
+          description: Validation error or event already reported
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: You have already reported this event
+        '401':
+          description: Authentication credentials were not provided or invalid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: Authentication credentials were not provided.
+        '404':
+          description: Event not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Evento no encontrado
+      security:
+        - TokenAuth: [ ]
+
+  /api/users/auth/google/:
+    post:
+      operationId: google_auth
+      description: "Autenticar usuario con Google y retornar token de API"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                idToken:
+                  type: string
+                  description: "ID Token obtenido de Google OAuth"
+              required:
+                - idToken
+      responses:
+        "200":
+          description: "Autenticación exitosa"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    example: "abc123token"
+                  user:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      username:
+                        type: string
+                      email:
+                        type: string
+        "400":
+          description: "Token no proporcionado"
+        "401":
+          description: "Token inválido"
+        "500":
+          description: "Error de servidor"
+      tags:
+        - users
+
+  /api/private_rooms/:
+    post:
+      summary: Crear una sala privada
+      description: Crea una sala privada con un código generado automáticamente. Requiere autenticación con token.
+      operationId: createPrivateRoom
+      tags:
+        - Salas Privadas
+      security:
+        - TokenAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  example: Sala de Reunión
+      responses:
+        '201':
+          description: Sala privada creada exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  code:
+                    type: string
+                    example: "A1B2C"
+                  name:
+                    type: string
+                    example: Sala de Reunión
+                  admin:
+                    type: integer
+                    example: 4
+        '401':
+          description: No autorizado. Token de autenticación requerido.
+           
+  /api/users/notifications/register-fcm-token:
+    post:
+      operationId: register_fcm_token
+      description: "Registra o actualiza el token FCM del usuario autenticado"
+      security:
+        - TokenAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+                  description: "Token FCM del dispositivo"
+              required:
+                - token
+      responses:
+        "200":
+          description: "Token registrado correctamente"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  user:
+                    type: integer
+                  token:
+                    type: string
+                  created_at:
+                    type: string
+                    format: date-time
+                  updated_at:
+                    type: string
+                    format: date-time
+        "400":
+          description: "Token no proporcionado"
+        "401":
+          description: "No autorizado - Token de autenticación inválido o ausente"
+      tags:
+        - notifications
+
+  /api/users/notifications/send-push:
+    post:
+      operationId: send_push_notification
+      description: "Envía una notificación push a un usuario específico"
+      security:
+        - TokenAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                  description: "ID del usuario al que enviar la notificación"
+                title:
+                  type: string
+                  description: "Título de la notificación"
+                body:
+                  type: string
+                  description: "Cuerpo/mensaje de la notificación"
+                data:
+                  type: object
+                  description: "Datos adicionales para la notificación (opcional)"
+              required:
+                - user_id
+                - title
+                - body
+      responses:
+        "200":
+          description: "Notificación enviada correctamente"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  result:
+                    type: object
+        "400":
+          description: "Faltan parámetros requeridos"
+        "401":
+          description: "No autorizado - Token de autenticación inválido o ausente"
+        "404":
+          description: "Usuario no encontrado o sin token FCM registrado"
+      tags:
+        - notifications
+
+  /api/users/notifications/list:
+    get:
+      operationId: list_notifications
+      description: "Lista todas las notificaciones internas del usuario autenticado"
+      security:
+        - TokenAuth: []
+      responses:
+        "200":
+          description: "Lista de notificaciones"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    user:
+                      type: integer
+                    title:
+                      type: string
+                    body:
+                      type: string
+                    is_read:
+                      type: boolean
+                    created_at:
+                      type: string
+                      format: date-time
+        "401":
+          description: "No autorizado - Token de autenticación inválido o ausente"
+      tags:
+        - notifications
+
+  /api/users/notifications/mark-read:
+    post:
+      operationId: mark_notification_read
+      description: "Marca una notificación como leída"
+      security:
+        - TokenAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                notification_id:
+                  type: integer
+                  description: "ID de la notificación a marcar como leída"
+              required:
+                - notification_id
+      responses:
+        "200":
+          description: "Notificación marcada como leída correctamente"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+        "400":
+          description: "ID de notificación no proporcionado o inválido"
+        "401":
+          description: "No autorizado - Token de autenticación inválido o ausente"
+        "404":
+          description: "Notificación no encontrada"
+      tags:
+        - notifications
+        
+  /api/users/profile/update-image:
+    post:
+      operationId: update_profile_image
+      description: "Actualiza la imagen de perfil del usuario autenticado. La imagen se almacena en AWS S3."
+      security:
+        - TokenAuth: []
+      tags:
+        - users
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                profile_image:
+                  type: string
+                  format: binary
+                  description: "Archivo de imagen para el perfil del usuario"
+              required:
+                - profile_image
+      responses:
+        "200":
+          description: "Imagen de perfil actualizada correctamente"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  username:
+                    type: string
+                    example: "johndoe"
+                  email:
+                    type: string
+                    example: "johndoe@example.com"
+                  language:
+                    type: string
+                    example: "cat"
+                  profile_image:
+                    type: string
+                    format: uri
+                    example: "https://agendados-bucket.s3.eu-central-1.amazonaws.com/profile_images/1/profile.jpg"
+        "400":
+          description: "No se ha enviado ninguna imagen o el formato es inválido"
+        "401":
+          description: "No autorizado - Token de autenticación inválido o ausente"

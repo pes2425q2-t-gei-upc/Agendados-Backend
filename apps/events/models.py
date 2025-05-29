@@ -55,3 +55,12 @@ class EventImage(models.Model):
 class EventLink(models.Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="links")
     link = models.URLField(max_length=500)
+
+class UserReportedEvent(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="reported_events")
+    reason = models.TextField(null=True, blank=True)
+    date_reported = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("user", "event")
